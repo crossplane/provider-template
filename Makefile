@@ -20,7 +20,19 @@ image: generate build-stack-package test
 image-push:
 	docker push $(ORG_NAME)/$(PROVIDER_NAME):latest
 
-all: image image-push
+install:
+	kubectl apply -f config/stack/sample/install.stack.yaml
+
+install-local: image
+	docker tag $(ORG_NAME)/$(PROVIDER_NAME):latest $(PROVIDER_NAME):local
+	$(KIND) load docker-image $(PROVIDER_NAME):local
+	kubectl apply -f config/stack/sample/local.install.stack.yaml
+
+run: generate
+	kubectl apply -f config/crd/ -R
+	go run cmd/provider/main.go -d
+
+all: image image-push install
 
 generate:
 	go generate ./...
@@ -55,4 +67,9 @@ clean: clean-stack-package
 clean-stack-package:
 	@rm -rf $(STACK_PACKAGE)
 
-.PHONY: generate tidy build-stack-package clean clean-stack-package build image all
+# ====================================================================================
+# Tools
+
+KIND=$(shell which kind)
+
+.PHONY: generate tidy build-stack-package clean clean-stack-package build image all install install-local run
