@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: provider-template
+  labels:
+    core.crossplane.io/name: "provider-template"
+spec:
+  selector:
+    matchLabels:
+      core.crossplane.io/name: "provider-template"
+  replicas: 1
+  template:
+    metadata:
+      name: "provider-template-controller"
+      labels:
+        core.crossplane.io/name: "provider-template"
+    spec:
+      containers:
+      - name: "provider-template-controller"
+        env:
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace

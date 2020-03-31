@@ -1,0 +1,81 @@
+
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.2.4
+  creationTimestamp: null
+  name: providers.template.crossplane-book.io
+spec:
+  additionalPrinterColumns:
+  - JSONPath: .spec.projectID
+    name: PROJECT-ID
+    type: string
+  - JSONPath: .metadata.creationTimestamp
+    name: AGE
+    type: date
+  - JSONPath: .spec.credentialsSecretRef.name
+    name: SECRET-NAME
+    priority: 1
+    type: string
+  group: template.crossplane-book.io
+  names:
+    kind: Provider
+    listKind: ProviderList
+    plural: providers
+    singular: provider
+  scope: Cluster
+  subresources: {}
+  validation:
+    openAPIV3Schema:
+      description: A Provider configures a Template 'provider'
+      properties:
+        apiVersion:
+          description: 'APIVersion defines the versioned schema of this representation
+            of an object. Servers should convert recognized schemas to the latest
+            internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+          type: string
+        kind:
+          description: 'Kind is a string value representing the REST resource this
+            object represents. Servers may infer this from the endpoint the client
+            submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+          type: string
+        metadata:
+          type: object
+        spec:
+          description: A ProviderSpec defines the desired state of a Provider.
+          properties:
+            credentialsSecretRef:
+              description: CredentialsSecretRef references a specific secret's key
+                that contains the credentials that are used to connect to the provider.
+              properties:
+                key:
+                  description: The key to select.
+                  type: string
+                name:
+                  description: Name of the secret.
+                  type: string
+                namespace:
+                  description: Namespace of the secret.
+                  type: string
+              required:
+              - key
+              - name
+              - namespace
+              type: object
+          type: object
+      required:
+      - spec
+      type: object
+  version: v1alpha1
+  versions:
+  - name: v1alpha1
+    served: true
+    storage: true
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []

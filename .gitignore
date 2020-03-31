@@ -1,0 +1,6 @@
+/bin
+/vendor
+/.vendor-new
+.vscode
+
+/stack-package
