@@ -3,10 +3,17 @@ title: Template Provider
 
 overviewShort: The Template Crossplane Provider allows you to bootstrap your own provider.
 overview: |-
-  
+  The Template Crossplane Provider is a minimal Crossplane Provider that serves
+  as a starting point for building new Crossplane Providers. It is meant to be
+  refactored for your use-case.
 # Markdown description of this entry
 readme: |
- 
+  `provider-template` is a minimal Crossplane Provider that is meant to be used
+  as a template for implementing new Providers. It comes with the following features
+  that are meant to be refactored:
+  - A `Provider` resource type that only points to a credentials `Secret`.
+  - A `MyType` resource type that serves as an example managed resource.
+  - A managed resource controller that reconciles `MyType` objects and simply prints their configuration in its `Observe` method.
 
 # Maintainer names and emails.
 maintainers:

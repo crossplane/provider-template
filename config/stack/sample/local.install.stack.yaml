@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: template
+---
+apiVersion: stacks.crossplane.io/v1alpha1
+kind: ClusterStackInstall
+metadata:
+  name: provider-template
+  namespace: template
+spec:
+  package: "provider-template:local"
+  imagePullPolicy: Never
