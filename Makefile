@@ -17,6 +17,11 @@ build: generate build-stack-package test
 image: generate build-stack-package test
 	docker build . -t $(ORG_NAME)/$(PROVIDER_NAME):latest -f cluster/Dockerfile
 
+image-push:
+	docker push $(ORG_NAME)/$(PROVIDER_NAME):latest
+
+all: image image-push
+
 generate:
 	go generate ./...
 
@@ -35,7 +40,7 @@ $(STACK_PACKAGE_REGISTRY):
 	@touch $(STACK_PACKAGE_REGISTRY)/app.yaml $(STACK_PACKAGE_REGISTRY)/install.yaml
 
 CRD_DIR=config/crd
-build-stack-package: $(STACK_PACKAGE_REGISTRY)
+build-stack-package: clean $(STACK_PACKAGE_REGISTRY)
 # Copy CRDs over
 	@find $(CRD_DIR) -type f -name '*.yaml' | \
 		while read filename ; do mkdir -p $(STACK_PACKAGE_REGISTRY)/resources/$$(basename $${filename%_*});\
@@ -50,4 +55,4 @@ clean: clean-stack-package
 clean-stack-package:
 	@rm -rf $(STACK_PACKAGE)
 
-.PHONY: generate tidy build-stack-package clean clean-stack-package
+.PHONY: generate tidy build-stack-package clean clean-stack-package build image all

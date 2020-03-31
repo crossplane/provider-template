@@ -9,4 +9,4 @@ metadata:
   name: provider-template
   namespace: template
 spec:
-  package: "hasheddan/provider-template:latest"
+  package: "crossplanebook/provider-template:latest"
