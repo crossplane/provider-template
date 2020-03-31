@@ -1,0 +1,9 @@
+apiVersion: sample.template.crossplanebook.io/v1alpha1
+kind: MyType
+metadata:
+  name: example
+spec:
+  forProvider:
+    configurableField: test
+  providerRef:
+    name: example

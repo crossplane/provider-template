@@ -32,7 +32,6 @@ type ProviderSpec struct {
 // +kubebuilder:object:root=true
 
 // A Provider configures a Template 'provider'
-// +kubebuilder:printcolumn:name="PROJECT-ID",type="string",JSONPath=".spec.projectID"
 // +kubebuilder:printcolumn:name="AGE",type="date",JSONPath=".metadata.creationTimestamp"
 // +kubebuilder:printcolumn:name="SECRET-NAME",type="string",JSONPath=".spec.credentialsSecretRef.name",priority=1
 // +kubebuilder:resource:scope=Cluster

@@ -6,12 +6,9 @@ metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.2.4
   creationTimestamp: null
-  name: providers.template.crossplane-book.io
+  name: providers.template.crossplanebook.io
 spec:
   additionalPrinterColumns:
-  - JSONPath: .spec.projectID
-    name: PROJECT-ID
-    type: string
   - JSONPath: .metadata.creationTimestamp
     name: AGE
     type: date
@@ -19,7 +16,7 @@ spec:
     name: SECRET-NAME
     priority: 1
     type: string
-  group: template.crossplane-book.io
+  group: template.crossplanebook.io
   names:
     kind: Provider
     listKind: ProviderList

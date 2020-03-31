@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-// Package v1alpha1 contains the core resources of the Template provider.
+// Package v1alpha1 contains the v1alpha1 group Sample resources of the Template provider.
 // +kubebuilder:object:generate=true
-// +groupName=template.crossplanebook.io
+// +groupName=sample.template.crossplanebook.io
 // +versionName=v1alpha1
 package v1alpha1
