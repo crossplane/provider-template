@@ -3,8 +3,8 @@ kind: Namespace
 metadata:
   name: template
 ---
-apiVersion: stacks.crossplane.io/v1alpha1
-kind: ClusterStackInstall
+apiVersion: packages.crossplane.io/v1alpha1
+kind: ClusterPackageInstall
 metadata:
   name: provider-template
   namespace: template
