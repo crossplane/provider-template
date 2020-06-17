@@ -12,7 +12,7 @@ with the following features that are meant to be refactored:
 ## Install
 
 If you would like to install `provider-template` without modifications create
-the following `ClusterStackInstall` in a Kubernetes cluster where Crossplane is
+the following `ClusterPackageInstall` in a Kubernetes cluster where Crossplane is
 installed:
 
 ```yaml
@@ -21,8 +21,8 @@ kind: Namespace
 metadata:
   name: template
 ---
-apiVersion: stacks.crossplane.io/v1alpha1
-kind: ClusterStackInstall
+apiVersion: packages.crossplane.io/v1alpha1
+kind: ClusterPackageInstall
 metadata:
   name: provider-template
   namespace: template
@@ -68,7 +68,7 @@ Build binary:
 make build
 ```
 
-Build stack package:
+Build package:
 ```
-make build-stack-package
+make build-package
 ```

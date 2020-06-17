@@ -5,28 +5,28 @@ SHELL := /bin/bash
 ORG_NAME=crossplanebook
 PROVIDER_NAME=provider-template
 
-# Stack setup
-STACK_PACKAGE=stack-package
-export STACK_PACKAGE
-STACK_PACKAGE_REGISTRY=$(STACK_PACKAGE)/.registry
-STACK_PACKAGE_REGISTRY_SOURCE=config/stack/manifests
+# Package setup
+PACKAGE=package
+export PACKAGE
+PACKAGE_REGISTRY=$(PACKAGE)/.registry
+PACKAGE_REGISTRY_SOURCE=config/package/manifests
 
-build: generate build-stack-package test
+build: generate build-package test
 	@CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -o ./bin/$(PROVIDER_NAME)-controller cmd/provider/main.go
 
-image: generate build-stack-package test
+image: generate build-package test
 	docker build . -t $(ORG_NAME)/$(PROVIDER_NAME):latest -f cluster/Dockerfile
 
 image-push:
 	docker push $(ORG_NAME)/$(PROVIDER_NAME):latest
 
 install:
-	kubectl apply -f config/stack/sample/install.stack.yaml
+	kubectl apply -f config/package/sample/install.package.yaml
 
 install-local: image
 	docker tag $(ORG_NAME)/$(PROVIDER_NAME):latest $(PROVIDER_NAME):local
 	$(KIND) load docker-image $(PROVIDER_NAME):local
-	kubectl apply -f config/stack/sample/local.install.stack.yaml
+	kubectl apply -f config/package/sample/local.install.package.yaml
 
 run: generate
 	kubectl apply -f config/crd/ -R
@@ -44,32 +44,32 @@ test:
 	go test -v ./...
 
 # ====================================================================================
-# Stacks related targets
+# Package related targets
 
-# Initialize the stack package folder
-$(STACK_PACKAGE_REGISTRY):
-	@mkdir -p $(STACK_PACKAGE_REGISTRY)/resources
-	@touch $(STACK_PACKAGE_REGISTRY)/app.yaml $(STACK_PACKAGE_REGISTRY)/install.yaml
+# Initialize the package folder
+$(PACKAGE_REGISTRY):
+	@mkdir -p $(PACKAGE_REGISTRY)/resources
+	@touch $(PACKAGE_REGISTRY)/app.yaml $(PACKAGE_REGISTRY)/install.yaml
 
 CRD_DIR=config/crd
-build-stack-package: clean $(STACK_PACKAGE_REGISTRY)
+build-package: clean $(PACKAGE_REGISTRY)
 # Copy CRDs over
 	@find $(CRD_DIR) -type f -name '*.yaml' | \
-		while read filename ; do mkdir -p $(STACK_PACKAGE_REGISTRY)/resources/$$(basename $${filename%_*});\
+		while read filename ; do mkdir -p $(PACKAGE_REGISTRY)/resources/$$(basename $${filename%_*});\
 		concise=$${filename#*_}; \
 		cat $$filename > \
-		$(STACK_PACKAGE_REGISTRY)/resources/$$( basename $${filename%_*} )/$$( basename $${concise/.yaml/.crd.yaml} ) \
+		$(PACKAGE_REGISTRY)/resources/$$( basename $${filename%_*} )/$$( basename $${concise/.yaml/.crd.yaml} ) \
 		; done
-	@cp -r $(STACK_PACKAGE_REGISTRY_SOURCE)/* $(STACK_PACKAGE_REGISTRY)
+	@cp -r $(PACKAGE_REGISTRY_SOURCE)/* $(PACKAGE_REGISTRY)
 
-clean: clean-stack-package
+clean: clean-package
 
-clean-stack-package:
-	@rm -rf $(STACK_PACKAGE)
+clean-package:
+	@rm -rf $(PACKAGE)
 
 # ====================================================================================
 # Tools
 
 KIND=$(shell which kind)
 
-.PHONY: generate tidy build-stack-package clean clean-stack-package build image all install install-local run
+.PHONY: generate tidy build-package clean clean-package build image all install install-local run

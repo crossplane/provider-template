@@ -3,4 +3,4 @@
 /.vendor-new
 .vscode
 
-/stack-package
+/package
