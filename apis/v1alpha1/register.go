@@ -39,12 +39,12 @@ var (
 
 // Provider type metadata.
 var (
-	ProviderKind             = reflect.TypeOf(Provider{}).Name()
+	ProviderKind             = reflect.TypeOf(ProviderConfig{}).Name()
 	ProviderGroupKind        = schema.GroupKind{Group: Group, Kind: ProviderKind}.String()
 	ProviderKindAPIVersion   = ProviderKind + "." + SchemeGroupVersion.String()
 	ProviderGroupVersionKind = SchemeGroupVersion.WithKind(ProviderKind)
 )
 
 func init() {
-	SchemeBuilder.Register(&Provider{}, &ProviderList{})
+	SchemeBuilder.Register(&ProviderConfig{}, &ProviderConfigList{})
 }
