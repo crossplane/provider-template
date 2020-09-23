@@ -28,7 +28,6 @@ import (
 
 	"github.com/crossplane/crossplane-runtime/pkg/event"
 	"github.com/crossplane/crossplane-runtime/pkg/logging"
-	"github.com/crossplane/crossplane-runtime/pkg/meta"
 	"github.com/crossplane/crossplane-runtime/pkg/reconciler/managed"
 	"github.com/crossplane/crossplane-runtime/pkg/resource"
 
@@ -80,17 +79,13 @@ func (c *myTypeConnector) Connect(ctx context.Context, mg resource.Managed) (man
 		return nil, errors.New(errNotMyType)
 	}
 
-	provider := &apisv1alpha1.Provider{}
-	if err := c.kube.Get(ctx, meta.NamespacedNameOf(cr.Spec.ProviderReference), provider); err != nil {
+	pc := &apisv1alpha1.ProviderConfig{}
+	if err := c.kube.Get(ctx, types.NamespacedName{Name: cr.GetProviderConfigReference().Name}, pc); err != nil {
 		return nil, errors.Wrap(err, errProviderNotRetrieved)
 	}
 
-	if provider.GetCredentialsSecretReference() == nil {
-		return nil, errors.New(errProviderSecretNil)
-	}
-
 	secret := &v1.Secret{}
-	n := types.NamespacedName{Namespace: provider.Spec.CredentialsSecretRef.Namespace, Name: provider.Spec.CredentialsSecretRef.Name}
+	n := types.NamespacedName{Namespace: pc.Spec.CredentialsSecretRef.Namespace, Name: pc.Spec.CredentialsSecretRef.Name}
 	if err := c.kube.Get(ctx, n, secret); err != nil {
 		return nil, errors.Wrap(err, errProviderSecretNotRetrieved)
 	}

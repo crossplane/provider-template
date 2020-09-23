@@ -22,31 +22,34 @@ import (
 	runtimev1alpha1 "github.com/crossplane/crossplane-runtime/apis/core/v1alpha1"
 )
 
-// A ProviderSpec defines the desired state of a Provider.
-type ProviderSpec struct {
-	runtimev1alpha1.ProviderSpec `json:",inline"`
+// A ProviderConfigSpec defines the desired state of a ProviderConfig.
+type ProviderConfigSpec struct {
+	// CredentialsSecretRef references a specific secret's key that contains
+	// the credentials that are used to connect to the external API.
+	CredentialsSecretRef runtimev1alpha1.SecretKeySelector `json:"credentialsSecretRef"`
 
-	// Add any other fields here for information that is specific to authenticating with an account for the provider
+	// Add any other fields here for information that is specific to
+	// authenticating with an account for the provider
 }
 
 // +kubebuilder:object:root=true
 
-// A Provider configures a Template 'provider'
+// A ProviderConfig configures a Template provider.
 // +kubebuilder:printcolumn:name="AGE",type="date",JSONPath=".metadata.creationTimestamp"
 // +kubebuilder:printcolumn:name="SECRET-NAME",type="string",JSONPath=".spec.credentialsSecretRef.name",priority=1
 // +kubebuilder:resource:scope=Cluster
-type Provider struct {
+type ProviderConfig struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	Spec ProviderSpec `json:"spec"`
+	Spec ProviderConfigSpec `json:"spec"`
 }
 
 // +kubebuilder:object:root=true
 
-// ProviderList contains a list of Provider
-type ProviderList struct {
+// ProviderConfigList contains a list of ProviderConfig.
+type ProviderConfigList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
-	Items           []Provider `json:"items"`
+	Items           []ProviderConfig `json:"items"`
 }
