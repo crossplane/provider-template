@@ -78,6 +78,8 @@ github.com/crossplane/crossplane-runtime v0.9.1-0.20200923111851-e1fc0493b2e8/go
 github.com/crossplane/crossplane-tools v0.0.0-20200219001116-bb8b2ce46330/go.mod h1:C735A9X0x0lR8iGVOOxb49Mt70Ua4EM2b7PGaRPBLd4=
 github.com/crossplane/crossplane-tools v0.0.0-20200412230150-efd0edd4565b h1:BqGODFDKcq4hd8RZeWmh8BsjfHS0eAtGWMLtT74rsG8=
 github.com/crossplane/crossplane-tools v0.0.0-20200412230150-efd0edd4565b/go.mod h1:C735A9X0x0lR8iGVOOxb49Mt70Ua4EM2b7PGaRPBLd4=
+github.com/crossplane/crossplane-tools v0.0.0-20200923030414-95b434323cd4 h1:0kPoB8KBZSAP6HNeC/B3bs+LyRsMflpJDRtTYPzZ6AU=
+github.com/crossplane/crossplane-tools v0.0.0-20200923030414-95b434323cd4/go.mod h1:C735A9X0x0lR8iGVOOxb49Mt70Ua4EM2b7PGaRPBLd4=
 github.com/crossplane/oam-kubernetes-runtime v0.0.0-20200426101222-2b61763c2e51/go.mod h1:tY+QSJ5ebP9jKh3CW4UsyeqQflnXEtEkiLYjxqVBJtI=
 github.com/dave/jennifer v1.3.0 h1:p3tl41zjjCZTNBytMwrUuiAnherNUZktlhPTKoF/sEk=
 github.com/dave/jennifer v1.3.0/go.mod h1:fIb+770HOpJ2fmN9EPPKOqm1vMGhB+TwXKMZhrIygKg=
