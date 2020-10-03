@@ -21,7 +21,7 @@ import (
 
 	"github.com/crossplane/crossplane-runtime/pkg/logging"
 
-	"github.com/crossplanebook/provider-template/pkg/controller/sample"
+	"github.com/crossplane/provider-template/pkg/controller/sample"
 )
 
 // Setup creates all Template controllers with the supplied logger and adds them to

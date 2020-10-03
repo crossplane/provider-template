@@ -1,4 +1,4 @@
-apiVersion: sample.template.crossplanebook.io/v1alpha1
+apiVersion: sample.template.crossplane.io/v1alpha1
 kind: MyType
 metadata:
   name: example

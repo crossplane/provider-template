@@ -40,8 +40,8 @@ keywords:
 - "infrastructure"
 
 # Links to more information about the application (about page, source code, etc.)
-website: "https://crossplanebook.github.io"
-source: "https://github.com/crossplanebook/provider-template"
+website: "https://crossplane.github.io"
+source: "https://github.com/crossplane/provider-template"
 
 # RBAC ClusterRoles will be generated permitting this package to use all verbs on all
 # resources in the groups listed below.

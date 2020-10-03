@@ -6,7 +6,7 @@ metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.2.4
   creationTimestamp: null
-  name: providerconfigs.template.crossplanebook.io
+  name: providerconfigs.template.crossplane.io
 spec:
   additionalPrinterColumns:
   - JSONPath: .metadata.creationTimestamp
@@ -16,7 +16,7 @@ spec:
     name: SECRET-NAME
     priority: 1
     type: string
-  group: template.crossplanebook.io
+  group: template.crossplane.io
   names:
     kind: ProviderConfig
     listKind: ProviderConfigList

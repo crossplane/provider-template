@@ -27,7 +27,7 @@ metadata:
   name: provider-template
   namespace: template
 spec:
-  package: "crossplanebook/provider-template:latest"
+  package: "crossplane/provider-template:latest"
 ```
 
 ## Developing
