@@ -36,10 +36,11 @@ import (
 )
 
 const (
-	errNotMyType                  = "managed resource is not a MyType custom resource"
-	errProviderNotRetrieved       = "provider could not be retrieved"
-	errProviderSecretNil          = "cannot find Secret reference on Provider"
-	errProviderSecretNotRetrieved = "secret referred in provider could not be retrieved"
+	errNotMyType    = "managed resource is not a MyType custom resource"
+	errTrackPCUsage = "cannot track ProviderConfig usage"
+	errGetPC        = "cannot get ProviderConfig"
+	errNoSecretRef  = "ProviderConfig does not reference a credentials Secret"
+	errGetSecret    = "cannot get credentials Secret"
 
 	errNewClient = "cannot create new Service"
 )
@@ -48,7 +49,7 @@ const (
 type NoOpService struct{}
 
 var (
-	newNoOpService = func() (interface{}, error) { return &NoOpService{}, nil }
+	newNoOpService = func(_ []byte) (interface{}, error) { return &NoOpService{}, nil }
 )
 
 // SetupMyType adds a controller that reconciles MyType managed resources.
@@ -70,7 +71,8 @@ func SetupMyType(mgr ctrl.Manager, l logging.Logger) error {
 
 type myTypeConnector struct {
 	kube         client.Client
-	newServiceFn func() (interface{}, error)
+	usage        resource.Tracker
+	newServiceFn func(creds []byte) (interface{}, error)
 }
 
 func (c *myTypeConnector) Connect(ctx context.Context, mg resource.Managed) (managed.ExternalClient, error) {
@@ -79,23 +81,34 @@ func (c *myTypeConnector) Connect(ctx context.Context, mg resource.Managed) (man
 		return nil, errors.New(errNotMyType)
 	}
 
+	if err := c.usage.Track(ctx, mg); err != nil {
+		return nil, errors.Wrap(err, errTrackPCUsage)
+	}
+
 	pc := &apisv1alpha1.ProviderConfig{}
 	if err := c.kube.Get(ctx, types.NamespacedName{Name: cr.GetProviderConfigReference().Name}, pc); err != nil {
-		return nil, errors.Wrap(err, errProviderNotRetrieved)
+		return nil, errors.Wrap(err, errGetPC)
 	}
 
-	secret := &v1.Secret{}
-	n := types.NamespacedName{Namespace: pc.Spec.CredentialsSecretRef.Namespace, Name: pc.Spec.CredentialsSecretRef.Name}
-	if err := c.kube.Get(ctx, n, secret); err != nil {
-		return nil, errors.Wrap(err, errProviderSecretNotRetrieved)
+	// A secret is the most common way to authenticate to a provider, but some
+	// providers additionally support alternative authentication methods such as
+	// IAM, so a reference is not required.
+	ref := pc.Spec.CredentialsSecretRef
+	if ref == nil {
+		return nil, errors.New(errNoSecretRef)
 	}
 
-	s, err := c.newServiceFn()
+	s := &v1.Secret{}
+	if err := c.kube.Get(ctx, types.NamespacedName{Namespace: ref.Namespace, Name: ref.Name}, s); err != nil {
+		return nil, errors.Wrap(err, errGetSecret)
+	}
+
+	svc, err := c.newServiceFn(s.Data[ref.Key])
 	if err != nil {
 		return nil, errors.Wrap(err, errNewClient)
 	}
 
-	return &myTypeExternal{kube: c.kube, service: s}, nil
+	return &myTypeExternal{kube: c.kube, service: svc}, nil
 }
 
 type myTypeExternal struct {

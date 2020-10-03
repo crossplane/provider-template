@@ -21,6 +21,7 @@ import (
 
 	"github.com/crossplane/crossplane-runtime/pkg/logging"
 
+	"github.com/crossplane/provider-template/pkg/controller/config"
 	"github.com/crossplane/provider-template/pkg/controller/sample"
 )
 
@@ -28,6 +29,7 @@ import (
 // the supplied manager.
 func Setup(mgr ctrl.Manager, l logging.Logger) error {
 	for _, setup := range []func(ctrl.Manager, logging.Logger) error{
+		config.Setup,
 		sample.SetupMyType,
 	} {
 		if err := setup(mgr, l); err != nil {

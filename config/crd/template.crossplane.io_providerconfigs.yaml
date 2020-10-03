@@ -23,7 +23,8 @@ spec:
     plural: providerconfigs
     singular: providerconfig
   scope: Cluster
-  subresources: {}
+  subresources:
+    status: {}
   validation:
     openAPIV3Schema:
       description: A ProviderConfig configures a Template provider.
@@ -40,7 +41,7 @@ spec:
           description: A ProviderConfigSpec defines the desired state of a ProviderConfig.
           properties:
             credentialsSecretRef:
-              description: CredentialsSecretRef references a specific secret's key that contains the credentials that are used to connect to the external API.
+              description: CredentialsSecretRef references a specific secret's key that contains the credentials that are used to connect to the provider.
               properties:
                 key:
                   description: The key to select.
@@ -56,11 +57,46 @@ spec:
               - name
               - namespace
               type: object
-          required:
-          - credentialsSecretRef
+          type: object
+        status:
+          description: A ProviderConfigStatus reflects the observed state of a ProviderConfig.
+          properties:
+            conditions:
+              description: Conditions of the resource.
+              items:
+                description: A Condition that may apply to a resource.
+                properties:
+                  lastTransitionTime:
+                    description: LastTransitionTime is the last time this condition transitioned from one status to another.
+                    format: date-time
+                    type: string
+                  message:
+                    description: A Message containing details about this condition's last transition from one status to another, if any.
+                    type: string
+                  reason:
+                    description: A Reason for this condition's last transition from one status to another.
+                    type: string
+                  status:
+                    description: Status of this condition; is it currently True, False, or Unknown?
+                    type: string
+                  type:
+                    description: Type of this condition. At most one of each condition type may apply to a resource at any point in time.
+                    type: string
+                required:
+                - lastTransitionTime
+                - reason
+                - status
+                - type
+                type: object
+              type: array
+            users:
+              description: Users of this provider configuration.
+              format: int64
+              type: integer
           type: object
       required:
       - spec
+      - status
       type: object
   version: v1alpha1
   versions:
