@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package sample
+package mytype
 
 import (
 	"context"
@@ -52,13 +52,13 @@ var (
 	newNoOpService = func(_ []byte) (interface{}, error) { return &NoOpService{}, nil }
 )
 
-// SetupMyType adds a controller that reconciles MyType managed resources.
-func SetupMyType(mgr ctrl.Manager, l logging.Logger) error {
+// Setup adds a controller that reconciles MyType managed resources.
+func Setup(mgr ctrl.Manager, l logging.Logger) error {
 	name := managed.ControllerName(v1alpha1.MyTypeGroupKind)
 
 	r := managed.NewReconciler(mgr,
 		resource.ManagedKind(v1alpha1.MyTypeGroupVersionKind),
-		managed.WithExternalConnecter(&myTypeConnector{kube: mgr.GetClient(), newServiceFn: newNoOpService}),
+		managed.WithExternalConnecter(&connector{kube: mgr.GetClient(), newServiceFn: newNoOpService}),
 		managed.WithInitializers(managed.NewNameAsExternalName(mgr.GetClient())),
 		managed.WithLogger(l.WithValues("controller", name)),
 		managed.WithRecorder(event.NewAPIRecorder(mgr.GetEventRecorderFor(name))))
@@ -69,13 +69,13 @@ func SetupMyType(mgr ctrl.Manager, l logging.Logger) error {
 		Complete(r)
 }
 
-type myTypeConnector struct {
+type connector struct {
 	kube         client.Client
 	usage        resource.Tracker
 	newServiceFn func(creds []byte) (interface{}, error)
 }
 
-func (c *myTypeConnector) Connect(ctx context.Context, mg resource.Managed) (managed.ExternalClient, error) {
+func (c *connector) Connect(ctx context.Context, mg resource.Managed) (managed.ExternalClient, error) {
 	cr, ok := mg.(*v1alpha1.MyType)
 	if !ok {
 		return nil, errors.New(errNotMyType)
@@ -108,15 +108,14 @@ func (c *myTypeConnector) Connect(ctx context.Context, mg resource.Managed) (man
 		return nil, errors.Wrap(err, errNewClient)
 	}
 
-	return &myTypeExternal{kube: c.kube, service: svc}, nil
+	return &external{service: svc}, nil
 }
 
-type myTypeExternal struct {
-	kube    client.Client
+type external struct {
 	service interface{}
 }
 
-func (c *myTypeExternal) Observe(ctx context.Context, mg resource.Managed) (managed.ExternalObservation, error) {
+func (c *external) Observe(ctx context.Context, mg resource.Managed) (managed.ExternalObservation, error) {
 	cr, ok := mg.(*v1alpha1.MyType)
 	if !ok {
 		return managed.ExternalObservation{}, errors.New(errNotMyType)
@@ -131,7 +130,7 @@ func (c *myTypeExternal) Observe(ctx context.Context, mg resource.Managed) (mana
 	}, nil
 }
 
-func (c *myTypeExternal) Create(ctx context.Context, mg resource.Managed) (managed.ExternalCreation, error) {
+func (c *external) Create(ctx context.Context, mg resource.Managed) (managed.ExternalCreation, error) {
 	cr, ok := mg.(*v1alpha1.MyType)
 	if !ok {
 		return managed.ExternalCreation{}, errors.New(errNotMyType)
@@ -142,7 +141,7 @@ func (c *myTypeExternal) Create(ctx context.Context, mg resource.Managed) (manag
 	return managed.ExternalCreation{}, nil
 }
 
-func (c *myTypeExternal) Update(ctx context.Context, mg resource.Managed) (managed.ExternalUpdate, error) {
+func (c *external) Update(ctx context.Context, mg resource.Managed) (managed.ExternalUpdate, error) {
 	cr, ok := mg.(*v1alpha1.MyType)
 	if !ok {
 		return managed.ExternalUpdate{}, errors.New(errNotMyType)
@@ -153,7 +152,7 @@ func (c *myTypeExternal) Update(ctx context.Context, mg resource.Managed) (manag
 	return managed.ExternalUpdate{}, nil
 }
 
-func (c *myTypeExternal) Delete(ctx context.Context, mg resource.Managed) error {
+func (c *external) Delete(ctx context.Context, mg resource.Managed) error {
 	cr, ok := mg.(*v1alpha1.MyType)
 	if !ok {
 		return errors.New(errNotMyType)
