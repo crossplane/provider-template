@@ -37,6 +37,9 @@ all: image image-push install
 generate:
 	go generate ./...
 
+lint:
+	$(LINT) run
+
 tidy:
 	go mod tidy
 
@@ -71,5 +74,6 @@ clean-package:
 # Tools
 
 KIND=$(shell which kind)
+LINT=$(shell which golangci-lint)
 
-.PHONY: generate tidy build-package clean clean-package build image all install install-local run
+.PHONY: generate tidy lint build-package clean clean-package build image all install install-local run
