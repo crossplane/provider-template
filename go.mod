@@ -6,6 +6,7 @@ require (
 	github.com/crossplane/crossplane-runtime v0.9.1-0.20201001234308-3f1afd106a8c
 	github.com/crossplane/crossplane-tools v0.0.0-20201001224552-fb258cc0eb30
 	github.com/crossplanebook/provider-template v0.0.0-20200617152219-f62849cb7889 // indirect
+	github.com/google/go-cmp v0.4.0
 	github.com/pkg/errors v0.9.1
 	gopkg.in/alecthomas/kingpin.v2 v2.2.6
 	k8s.io/api v0.18.6
