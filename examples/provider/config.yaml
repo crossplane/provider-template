@@ -7,8 +7,8 @@ type: Opaque
 data:
   # credentials: BASE64ENCODED_PROVIDER_CREDS
 ---
-apiVersion: template.crossplanebook.io/v1alpha1
-kind: Provider
+apiVersion: template.crossplane.io/v1alpha1
+kind: ProviderConfig
 metadata:
   name: example
 spec:
