@@ -4,71 +4,52 @@
 that is meant to be used as a template for implementing new Providers. It comes
 with the following features that are meant to be refactored:
 
-- A `Provider` resource type that only points to a credentials `Secret`.
+- A `ProviderConfig` type that only points to a credentials `Secret`.
 - A `MyType` resource type that serves as an example managed resource.
 - A managed resource controller that reconciles `MyType` objects and simply
   prints their configuration in its `Observe` method.
 
-## Install
-
-If you would like to install `provider-template` without modifications create
-the following `ClusterPackageInstall` in a Kubernetes cluster where Crossplane is
-installed:
-
-```yaml
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: template
----
-apiVersion: packages.crossplane.io/v1alpha1
-kind: ClusterPackageInstall
-metadata:
-  name: provider-template
-  namespace: template
-spec:
-  package: "crossplane/provider-template:latest"
-```
-
 ## Developing
 
 Run against a Kubernetes cluster:
-```
+
+```console
 make run
 ```
 
 Install `latest` into Kubernetes cluster where Crossplane is installed:
-```
+
+```console
 make install
 ```
 
 Install local build into [Kind](https://kind.sigs.k8s.io/docs/user/quick-start/)
 cluster where Crossplane is installed:
-```
+
+```console
 make install-local
 ```
 
 Build, push, and install:
-```
+
+```console
 make all
 ```
 
 Build image:
-```
+
+```console
 make image
 ```
 
 Push image:
-```
+
+```console
 make push
 ```
 
 Build binary:
-```
-make build
-```
 
-Build package:
-```
-make build-package
+```console
+make build
 ```
