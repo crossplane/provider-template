@@ -8,7 +8,7 @@ data:
   # credentials: BASE64ENCODED_PROVIDER_CREDS
 ---
 apiVersion: template.crossplane.io/v1alpha1
-kind: Provider
+kind: ProviderConfig
 metadata:
   name: example
 spec:

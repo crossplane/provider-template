@@ -5,5 +5,5 @@ metadata:
 spec:
   forProvider:
     configurableField: test
-  providerRef:
+  providerConfigRef:
     name: example
