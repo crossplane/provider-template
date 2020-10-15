@@ -47,7 +47,7 @@ type ProviderConfig struct {
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
 	Spec   ProviderConfigSpec   `json:"spec"`
-	Status ProviderConfigStatus `json:"status"`
+	Status ProviderConfigStatus `json:"status,omitempty"`
 }
 
 // +kubebuilder:object:root=true
