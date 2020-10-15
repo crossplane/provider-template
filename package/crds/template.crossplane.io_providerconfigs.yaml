@@ -96,7 +96,6 @@ spec:
           type: object
       required:
       - spec
-      - status
       type: object
   version: v1alpha1
   versions:
