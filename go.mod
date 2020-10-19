@@ -4,7 +4,7 @@ go 1.13
 
 require (
 	github.com/crossplane/crossplane-runtime v0.10.0
-	github.com/crossplane/crossplane-tools v0.0.0-20201001224552-fb258cc0eb30
+	github.com/crossplane/crossplane-tools v0.0.0-20201007233256-88b291e145bb
 	github.com/google/go-cmp v0.4.0
 	github.com/pkg/errors v0.9.1
 	gopkg.in/alecthomas/kingpin.v2 v2.2.6
