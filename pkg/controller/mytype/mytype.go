@@ -102,7 +102,7 @@ func (c *connector) Connect(ctx context.Context, mg resource.Managed) (managed.E
 	// A secret is the most common way to authenticate to a provider, but some
 	// providers additionally support alternative authentication methods such as
 	// IAM, so a reference is not required.
-	ref := pc.Spec.CredentialsSecretRef
+	ref := pc.Spec.Credentials.SecretRef
 	if ref == nil {
 		return nil, errors.New(errNoSecretRef)
 	}
