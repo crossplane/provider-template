@@ -19,12 +19,12 @@ package v1alpha1
 import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	runtimev1alpha1 "github.com/crossplane/crossplane-runtime/apis/core/v1alpha1"
+	xpv1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
 // A ProviderConfigSpec defines the desired state of a ProviderConfig.
 type ProviderConfigSpec struct {
-	runtimev1alpha1.ProviderConfigSpec `json:",inline"`
+	xpv1.ProviderConfigSpec `json:",inline"`
 
 	// Add any other fields here for information that is specific to configuring
 	// a provider, such as authentication details.
@@ -32,7 +32,7 @@ type ProviderConfigSpec struct {
 
 // A ProviderConfigStatus reflects the observed state of a ProviderConfig.
 type ProviderConfigStatus struct {
-	runtimev1alpha1.ProviderConfigStatus `json:",inline"`
+	xpv1.ProviderConfigStatus `json:",inline"`
 }
 
 // +kubebuilder:object:root=true
@@ -71,7 +71,7 @@ type ProviderConfigUsage struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	runtimev1alpha1.ProviderConfigUsage `json:",inline"`
+	xpv1.ProviderConfigUsage `json:",inline"`
 }
 
 // +kubebuilder:object:root=true
