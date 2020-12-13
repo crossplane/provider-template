@@ -19,7 +19,7 @@ package v1alpha1
 import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	runtimev1alpha1 "github.com/crossplane/crossplane-runtime/apis/core/v1alpha1"
+	xpv1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
 // MyTypeParameters are the configurable fields of a MyType.
@@ -34,14 +34,14 @@ type MyTypeObservation struct {
 
 // A MyTypeSpec defines the desired state of a MyType.
 type MyTypeSpec struct {
-	runtimev1alpha1.ResourceSpec `json:",inline"`
-	ForProvider                  MyTypeParameters `json:"forProvider"`
+	xpv1.ResourceSpec `json:",inline"`
+	ForProvider       MyTypeParameters `json:"forProvider"`
 }
 
 // A MyTypeStatus represents the observed state of a MyType.
 type MyTypeStatus struct {
-	runtimev1alpha1.ResourceStatus `json:",inline"`
-	AtProvider                     MyTypeObservation `json:"atProvider,omitempty"`
+	xpv1.ResourceStatus `json:",inline"`
+	AtProvider          MyTypeObservation `json:"atProvider,omitempty"`
 }
 
 // +kubebuilder:object:root=true
