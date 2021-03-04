@@ -22,6 +22,8 @@ all: image image-push install
 
 generate:
 	go generate ./...
+	@find package/crds -name *.yaml -exec sed -i.sed -e '1,2d' {} \;
+	@find package/crds -name *.yaml.sed -delete
 
 lint:
 	$(LINT) run
