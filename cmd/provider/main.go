@@ -27,7 +27,7 @@ import (
 	"github.com/crossplane/crossplane-runtime/pkg/logging"
 
 	"github.com/crossplane/provider-template/apis"
-	"github.com/crossplane/provider-template/pkg/controller"
+	"github.com/crossplane/provider-template/internal/controller"
 )
 
 func main() {
