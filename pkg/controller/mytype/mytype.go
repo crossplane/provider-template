@@ -21,7 +21,6 @@ import (
 	"fmt"
 
 	"github.com/pkg/errors"
-	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -39,8 +38,7 @@ const (
 	errNotMyType    = "managed resource is not a MyType custom resource"
 	errTrackPCUsage = "cannot track ProviderConfig usage"
 	errGetPC        = "cannot get ProviderConfig"
-	errNoSecretRef  = "ProviderConfig does not reference a credentials Secret"
-	errGetSecret    = "cannot get credentials Secret"
+	errGetCreds     = "cannot get credentials"
 
 	errNewClient = "cannot create new Service"
 )
@@ -82,8 +80,8 @@ type connector struct {
 // Connect typically produces an ExternalClient by:
 // 1. Tracking that the managed resource is using a ProviderConfig.
 // 2. Getting the managed resource's ProviderConfig.
-// 3. Getting the ProviderConfig's credentials secret.
-// 4. Using the credentials secret to form a client.
+// 3. Getting the credentials specified by the ProviderConfig.
+// 4. Using the credentials to form a client.
 func (c *connector) Connect(ctx context.Context, mg resource.Managed) (managed.ExternalClient, error) {
 	cr, ok := mg.(*v1alpha1.MyType)
 	if !ok {
@@ -99,20 +97,13 @@ func (c *connector) Connect(ctx context.Context, mg resource.Managed) (managed.E
 		return nil, errors.Wrap(err, errGetPC)
 	}
 
-	// A secret is the most common way to authenticate to a provider, but some
-	// providers additionally support alternative authentication methods such as
-	// IAM, so a reference is not required.
-	ref := pc.Spec.Credentials.SecretRef
-	if ref == nil {
-		return nil, errors.New(errNoSecretRef)
+	cd := pc.Spec.Credentials
+	data, err := resource.CommonCredentialExtractor(ctx, cd.Source, c.kube, cd.CommonCredentialSelectors)
+	if err != nil {
+		return nil, errors.Wrap(err, errGetCreds)
 	}
 
-	s := &v1.Secret{}
-	if err := c.kube.Get(ctx, types.NamespacedName{Namespace: ref.Namespace, Name: ref.Name}, s); err != nil {
-		return nil, errors.Wrap(err, errGetSecret)
-	}
-
-	svc, err := c.newServiceFn(s.Data[ref.Key])
+	svc, err := c.newServiceFn(data)
 	if err != nil {
 		return nil, errors.Wrap(err, errNewClient)
 	}
