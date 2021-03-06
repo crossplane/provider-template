@@ -25,9 +25,10 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
 	"github.com/crossplane/crossplane-runtime/pkg/logging"
+	"github.com/crossplane/crossplane-runtime/pkg/ratelimiter"
 
 	"github.com/crossplane/provider-template/apis"
-	"github.com/crossplane/provider-template/pkg/controller"
+	"github.com/crossplane/provider-template/internal/controller"
 )
 
 func main() {
@@ -60,7 +61,8 @@ func main() {
 	})
 	kingpin.FatalIfError(err, "Cannot create controller manager")
 
+	rl := ratelimiter.NewDefaultProviderRateLimiter(ratelimiter.DefaultProviderRPS)
 	kingpin.FatalIfError(apis.AddToScheme(mgr.GetScheme()), "Cannot add Template APIs to scheme")
-	kingpin.FatalIfError(controller.Setup(mgr, log), "Cannot setup Template controllers")
+	kingpin.FatalIfError(controller.Setup(mgr, log, rl), "Cannot setup Template controllers")
 	kingpin.FatalIfError(mgr.Start(ctrl.SetupSignalHandler()), "Cannot start controller manager")
 }
