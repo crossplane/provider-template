@@ -22,11 +22,14 @@ import (
 
 	"github.com/pkg/errors"
 	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/client-go/util/workqueue"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/controller"
 
 	"github.com/crossplane/crossplane-runtime/pkg/event"
 	"github.com/crossplane/crossplane-runtime/pkg/logging"
+	"github.com/crossplane/crossplane-runtime/pkg/ratelimiter"
 	"github.com/crossplane/crossplane-runtime/pkg/reconciler/managed"
 	"github.com/crossplane/crossplane-runtime/pkg/resource"
 
@@ -51,8 +54,12 @@ var (
 )
 
 // Setup adds a controller that reconciles MyType managed resources.
-func Setup(mgr ctrl.Manager, l logging.Logger) error {
+func Setup(mgr ctrl.Manager, l logging.Logger, rl workqueue.RateLimiter) error {
 	name := managed.ControllerName(v1alpha1.MyTypeGroupKind)
+
+	o := controller.Options{
+		RateLimiter: ratelimiter.NewDefaultManagedRateLimiter(rl),
+	}
 
 	r := managed.NewReconciler(mgr,
 		resource.ManagedKind(v1alpha1.MyTypeGroupVersionKind),
@@ -65,6 +72,7 @@ func Setup(mgr ctrl.Manager, l logging.Logger) error {
 
 	return ctrl.NewControllerManagedBy(mgr).
 		Named(name).
+		WithOptions(o).
 		For(&v1alpha1.MyType{}).
 		Complete(r)
 }
