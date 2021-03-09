@@ -12,7 +12,9 @@ kind: ProviderConfig
 metadata:
   name: example
 spec:
-  credentialsSecretRef:
-    namespace: crossplane-system
-    name: example-provider-secret
-    key: credentials
+  credentials:
+    source: Secret
+    secretRef:
+      namespace: crossplane-system
+      name: example-provider-secret
+      key: credentials
