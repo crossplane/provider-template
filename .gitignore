@@ -1,5 +1,16 @@
-/bin
+/.cache
+/.work
+/_output
+cover.out
 /vendor
 /.vendor-new
-.vscode
+.registry
 
+# ignore GoLand files (debug config etc...)
+/.idea
+
+# ignore vscode files (debug config etc...)
+/.vscode
+
+# ignore asdf local versions
+/.tool-versions
