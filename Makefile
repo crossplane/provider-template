@@ -18,7 +18,7 @@ run: generate
 	kubectl apply -f package/crds/ -R
 	go run cmd/provider/main.go -d
 
-all: image image-push install
+all: image image-push
 
 generate:
 	go generate ./...
