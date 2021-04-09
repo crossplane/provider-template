@@ -1,0 +1,13 @@
+apiVersion: meta.pkg.crossplane.io/v1alpha1
+kind: Provider
+metadata:
+  name: provider-template
+  annotations:
+    company: Template
+    maintainer: template <template@mail.com>
+    source: github.com/crossplane/provider-template
+    license: Apache-2.0
+
+spec:
+  controller:
+    image: salaboy/provider-template-controller:v0.0.1
