@@ -1,6 +1,6 @@
 module github.com/crossplane/provider-template
 
-go 1.13
+go 1.16
 
 require (
 	github.com/crossplane/crossplane-runtime v0.13.0
