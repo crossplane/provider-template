@@ -1,16 +1,15 @@
 module github.com/crossplane/provider-template
 
-go 1.16
+go 1.17
 
 require (
-	github.com/crossplane/crossplane-runtime v0.13.0
-	github.com/crossplane/crossplane-tools v0.0.0-20201201125637-9ddc70edfd0d
-	github.com/google/go-cmp v0.5.2
+	github.com/crossplane/crossplane-runtime v0.14.1-0.20210812020058-ba474e81c62c
+	github.com/crossplane/crossplane-tools v0.0.0-20210320162312-1baca298c527
+	github.com/google/go-cmp v0.5.6
 	github.com/pkg/errors v0.9.1
 	gopkg.in/alecthomas/kingpin.v2 v2.2.6
-	k8s.io/api v0.20.1
-	k8s.io/apimachinery v0.20.1
-	k8s.io/client-go v0.20.1
-	sigs.k8s.io/controller-runtime v0.8.0
-	sigs.k8s.io/controller-tools v0.3.0
+	k8s.io/apimachinery v0.21.3
+	k8s.io/client-go v0.21.3
+	sigs.k8s.io/controller-runtime v0.9.6
+	sigs.k8s.io/controller-tools v0.6.2
 )
