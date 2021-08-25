@@ -2,4 +2,5 @@
 /vendor
 /.vendor-new
 .vscode
-
+.idea
+.DS_Store
