@@ -11,7 +11,7 @@ spec:
     categories:
     - crossplane
     - provider
-    - PROVIDER-NAME
+    - template
     kind: ProviderConfigUsage
     listKind: ProviderConfigUsageList
     plural: providerconfigusages
@@ -35,8 +35,6 @@ spec:
     schema:
       openAPIV3Schema:
         description: A ProviderConfigUsage indicates that a resource is using a ProviderConfig.
-          Please replace `PROVIDER-NAME` with your actual provider name, like `aws`,
-          `azure`, `gcp`, `alibaba`
         properties:
           apiVersion:
             description: 'APIVersion defines the versioned schema of this representation

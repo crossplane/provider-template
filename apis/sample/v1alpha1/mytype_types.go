@@ -54,8 +54,7 @@ type MyTypeStatus struct {
 // +kubebuilder:printcolumn:name="STATUS",type="string",JSONPath=".status.bindingPhase"
 // +kubebuilder:printcolumn:name="STATE",type="string",JSONPath=".status.atProvider.state"
 // +kubebuilder:printcolumn:name="AGE",type="date",JSONPath=".metadata.creationTimestamp"
-// Please replace `PROVIDER-NAME` with your actual provider name, like `aws`, `azure`, `gcp`, `alibaba`
-// +kubebuilder:resource:scope=Cluster,categories={crossplane,managed,PROVIDER-NAME}
+// +kubebuilder:resource:scope=Cluster,categories={crossplane,managed,template}
 type MyType struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
