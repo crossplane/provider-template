@@ -17,7 +17,10 @@ limitations under the License.
 package v1alpha1
 
 import (
+	"reflect"
+
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 
 	xpv1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
@@ -66,27 +69,14 @@ type ProviderConfigList struct {
 	Items           []ProviderConfig `json:"items"`
 }
 
-// +kubebuilder:object:root=true
+// ProviderConfig type metadata.
+var (
+	ProviderConfigKind             = reflect.TypeOf(ProviderConfig{}).Name()
+	ProviderConfigGroupKind        = schema.GroupKind{Group: Group, Kind: ProviderConfigKind}.String()
+	ProviderConfigKindAPIVersion   = ProviderConfigKind + "." + SchemeGroupVersion.String()
+	ProviderConfigGroupVersionKind = SchemeGroupVersion.WithKind(ProviderConfigKind)
+)
 
-// A ProviderConfigUsage indicates that a resource is using a ProviderConfig.
-// +kubebuilder:printcolumn:name="AGE",type="date",JSONPath=".metadata.creationTimestamp"
-// +kubebuilder:printcolumn:name="CONFIG-NAME",type="string",JSONPath=".providerConfigRef.name"
-// +kubebuilder:printcolumn:name="RESOURCE-KIND",type="string",JSONPath=".resourceRef.kind"
-// +kubebuilder:printcolumn:name="RESOURCE-NAME",type="string",JSONPath=".resourceRef.name"
-// Please replace `PROVIDER-NAME` with your actual provider name, like `aws`, `azure`, `gcp`, `alibaba`
-// +kubebuilder:resource:scope=Cluster,categories={crossplane,provider,PROVIDER-NAME}
-type ProviderConfigUsage struct {
-	metav1.TypeMeta   `json:",inline"`
-	metav1.ObjectMeta `json:"metadata,omitempty"`
-
-	xpv1.ProviderConfigUsage `json:",inline"`
-}
-
-// +kubebuilder:object:root=true
-
-// ProviderConfigUsageList contains a list of ProviderConfigUsage
-type ProviderConfigUsageList struct {
-	metav1.TypeMeta `json:",inline"`
-	metav1.ListMeta `json:"metadata,omitempty"`
-	Items           []ProviderConfigUsage `json:"items"`
+func init() {
+	SchemeBuilder.Register(&ProviderConfig{}, &ProviderConfigList{})
 }

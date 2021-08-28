@@ -1,5 +1,5 @@
 /*
-Copyright 2020 The Crossplane Authors.
+Copyright 2021 The Crossplane Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -19,31 +19,36 @@ package v1alpha1
 import (
 	"reflect"
 
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
-	"sigs.k8s.io/controller-runtime/pkg/scheme"
+
+	xpv1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
-// Package type metadata.
-const (
-	Group   = "template.crossplane.io"
-	Version = "v1alpha1"
-)
+// +kubebuilder:object:root=true
 
-var (
-	// SchemeGroupVersion is group version used to register these objects
-	SchemeGroupVersion = schema.GroupVersion{Group: Group, Version: Version}
+// A ProviderConfigUsage indicates that a resource is using a ProviderConfig.
+// +kubebuilder:printcolumn:name="AGE",type="date",JSONPath=".metadata.creationTimestamp"
+// +kubebuilder:printcolumn:name="CONFIG-NAME",type="string",JSONPath=".providerConfigRef.name"
+// +kubebuilder:printcolumn:name="RESOURCE-KIND",type="string",JSONPath=".resourceRef.kind"
+// +kubebuilder:printcolumn:name="RESOURCE-NAME",type="string",JSONPath=".resourceRef.name"
+// Please replace `PROVIDER-NAME` with your actual provider name, like `aws`, `azure`, `gcp`, `alibaba`
+// +kubebuilder:resource:scope=Cluster,categories={crossplane,provider,PROVIDER-NAME}
+type ProviderConfigUsage struct {
+	metav1.TypeMeta   `json:",inline"`
+	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	// SchemeBuilder is used to add go types to the GroupVersionKind scheme
-	SchemeBuilder = &scheme.Builder{GroupVersion: SchemeGroupVersion}
-)
+	xpv1.ProviderConfigUsage `json:",inline"`
+}
 
-// ProviderConfig type metadata.
-var (
-	ProviderConfigKind             = reflect.TypeOf(ProviderConfig{}).Name()
-	ProviderConfigGroupKind        = schema.GroupKind{Group: Group, Kind: ProviderConfigKind}.String()
-	ProviderConfigKindAPIVersion   = ProviderConfigKind + "." + SchemeGroupVersion.String()
-	ProviderConfigGroupVersionKind = SchemeGroupVersion.WithKind(ProviderConfigKind)
-)
+// +kubebuilder:object:root=true
+
+// ProviderConfigUsageList contains a list of ProviderConfigUsage
+type ProviderConfigUsageList struct {
+	metav1.TypeMeta `json:",inline"`
+	metav1.ListMeta `json:"metadata,omitempty"`
+	Items           []ProviderConfigUsage `json:"items"`
+}
 
 // ProviderConfigUsage type metadata.
 var (
@@ -59,6 +64,5 @@ var (
 )
 
 func init() {
-	SchemeBuilder.Register(&ProviderConfig{}, &ProviderConfigList{})
 	SchemeBuilder.Register(&ProviderConfigUsage{}, &ProviderConfigUsageList{})
 }
