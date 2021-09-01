@@ -3,7 +3,7 @@ module github.com/crossplane/provider-template
 go 1.16
 
 require (
-	github.com/crossplane/crossplane-runtime v0.14.0
+	github.com/crossplane/crossplane-runtime v0.15.0
 	github.com/crossplane/crossplane-tools v0.0.0-20210320162312-1baca298c527
 	github.com/google/go-cmp v0.5.6
 	github.com/pkg/errors v0.9.1
