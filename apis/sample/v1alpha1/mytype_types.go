@@ -17,7 +17,10 @@ limitations under the License.
 package v1alpha1
 
 import (
+	"reflect"
+
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 
 	xpv1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
@@ -51,8 +54,7 @@ type MyTypeStatus struct {
 // +kubebuilder:printcolumn:name="STATUS",type="string",JSONPath=".status.bindingPhase"
 // +kubebuilder:printcolumn:name="STATE",type="string",JSONPath=".status.atProvider.state"
 // +kubebuilder:printcolumn:name="AGE",type="date",JSONPath=".metadata.creationTimestamp"
-// Please replace `PROVIDER-NAME` with your actual provider name, like `aws`, `azure`, `gcp`, `alibaba`
-// +kubebuilder:resource:scope=Cluster,categories={crossplane,managed,PROVIDER-NAME}
+// +kubebuilder:resource:scope=Cluster,categories={crossplane,managed,template}
 type MyType struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
@@ -68,4 +70,16 @@ type MyTypeList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
 	Items           []MyType `json:"items"`
+}
+
+// MyType type metadata.
+var (
+	MyTypeKind             = reflect.TypeOf(MyType{}).Name()
+	MyTypeGroupKind        = schema.GroupKind{Group: Group, Kind: MyTypeKind}.String()
+	MyTypeKindAPIVersion   = MyTypeKind + "." + SchemeGroupVersion.String()
+	MyTypeGroupVersionKind = SchemeGroupVersion.WithKind(MyTypeKind)
+)
+
+func init() {
+	SchemeBuilder.Register(&MyType{}, &MyTypeList{})
 }

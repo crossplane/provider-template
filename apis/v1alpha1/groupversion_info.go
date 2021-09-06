@@ -14,18 +14,20 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+// Package v1alpha1 contains the core resources of the Template provider.
+// +kubebuilder:object:generate=true
+// +groupName=template.crossplane.io
+// +versionName=v1alpha1
 package v1alpha1
 
 import (
-	"reflect"
-
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"sigs.k8s.io/controller-runtime/pkg/scheme"
 )
 
 // Package type metadata.
 const (
-	Group   = "sample.template.crossplane.io"
+	Group   = "template.crossplane.io"
 	Version = "v1alpha1"
 )
 
@@ -36,15 +38,3 @@ var (
 	// SchemeBuilder is used to add go types to the GroupVersionKind scheme
 	SchemeBuilder = &scheme.Builder{GroupVersion: SchemeGroupVersion}
 )
-
-// MyType type metadata.
-var (
-	MyTypeKind             = reflect.TypeOf(MyType{}).Name()
-	MyTypeGroupKind        = schema.GroupKind{Group: Group, Kind: MyTypeKind}.String()
-	MyTypeKindAPIVersion   = MyTypeKind + "." + SchemeGroupVersion.String()
-	MyTypeGroupVersionKind = SchemeGroupVersion.WithKind(MyTypeKind)
-)
-
-func init() {
-	SchemeBuilder.Register(&MyType{}, &MyTypeList{})
-}
