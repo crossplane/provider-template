@@ -2,7 +2,7 @@ run:
   deadline: 2m
 
   skip-files:
-  - "zz_generated\\..+\\.go$"
+  - "zz_\\..+\\.go$"
 
 output:
   # colored-line-number|line-number|json|tab|checkstyle|code-climate, default is "colored-line-number"
