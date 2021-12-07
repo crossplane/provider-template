@@ -11,32 +11,15 @@ with the following features that are meant to be refactored:
 
 ## Developing
 
-Run against a Kubernetes cluster:
+1. Use this repository as a template to create a new one.
+1. Find-and-replace `provider-template` with your provider's name.
+1. Run `make` to initialize the "build" Make submodule we use for CI/CD.
+1. Run `make reviewable` to run code generation, linters, and tests.
+1. Replace `MyType` with your own managed resource implementation(s).
 
-```console
-make run
-```
+Refer to Crossplane's [CONTRIBUTING.md] file for more information on how the
+Crossplane community prefers to work. The [Provider Development][provider-dev]
+guide may also be of use.
 
-Build, push, and install:
-
-```console
-make all
-```
-
-Build image:
-
-```console
-make image
-```
-
-Push image:
-
-```console
-make push
-```
-
-Build binary:
-
-```console
-make build
-```
+[CONTRIBUTING.md]: https://github.com/crossplane/crossplane/blob/master/CONTRIBUTING.md
+[provider-dev]: https://github.com/crossplane/crossplane/blob/master/docs/contributing/provider_development_guide.md
