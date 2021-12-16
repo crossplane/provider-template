@@ -3,7 +3,7 @@ name: CI
 on:
   push:
     branches:
-      - master
+      - main
       - release-*
   pull_request: {}
   workflow_dispatch: {}
@@ -315,10 +315,10 @@ jobs:
           DOCS_GIT_PSW: ${{ secrets.UPBOUND_BOT_GITHUB_PSW }}
 
       - name: Promote Artifacts in S3 and Docker Hub
-        if: github.ref == 'refs/heads/master' && env.AWS_USR != '' && env.DOCKER_USR != ''
+        if: github.ref == 'refs/heads/main' && env.AWS_USR != '' && env.DOCKER_USR != ''
         run: make -j2 promote
         env:
-          BRANCH_NAME: master
+          BRANCH_NAME: main
           CHANNEL: master
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_USR }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_PSW }}
