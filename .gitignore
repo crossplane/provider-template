@@ -1,4 +1,7 @@
-/bin
+/.cache
+/.work
+/_output
+cover.out
 /vendor
 /.vendor-new
 .vscode
