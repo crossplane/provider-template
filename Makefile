@@ -67,7 +67,7 @@ go.cachedir:
 run: go.build
 	@$(INFO) Running Crossplane locally out-of-cluster . . .
 	@# To see other arguments that can be provided, run the command with --help instead
-	$(GO_OUT_DIR)/$(PROJECT_NAME) --debug
+	$(GO_OUT_DIR)/provider --debug
 
 dev: $(KIND) $(KUBECTL)
 	@$(INFO) Creating kind cluster
