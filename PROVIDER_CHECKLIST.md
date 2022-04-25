@@ -27,9 +27,10 @@ Please open an issue in the Crossplane [org](https://github.com/crossplane/org)
 repository or reach out to the Crossplane
 [#dev](https://crossplane.slack.com/archives/CEF5N8X08) channel.
 
-There is a template repository called
-[provider-template](https://github.com/crossplane/provider-template) that can be
-used as a starting point for new providers.
+The [provider-template](https://github.com/crossplane/provider-template) repository can be
+used as a starting point for new providers. For [terrajet]-based providers, the
+[provider-jet-template](https://github.com/crossplane-contrib/provider-jet-template) is 
+available.
 
 ## Files
 
@@ -49,7 +50,7 @@ Most Crossplane providers include the following files:
   with contacts for project Owners
 - [ ]  Ensure `hack/boilerplate.go.txt` (used in Code generation) includes
   Crossplane Authors, Apache license and any other Copyright statements:
-  [https://github.com/crossplane/provider-aws/blob/master/hack/boilerplate.go.txt](https://github.com/crossplane/provider-aws/blob/master/hack/boilerplate.go.txt)
+  [https://github.com/crossplane/provider-template/blob/main/hack/boilerplate.go.txt](https://github.com/crossplane/provider-template/blob/main/hack/boilerplate.go.txt)
 - [ ] Include Documentation on how to:
   - [ ] Install Provider
   - [ ] Contribute to Development
@@ -81,10 +82,18 @@ repository contains most of these settings.
 
 ## Deployment of Artifacts
 
-When deploying provider artifacts, projects should:
+When deploying provider artifacts, projects should generally follow the Crossplane
+[release process](https://crossplane.io/docs/master/contributing/release-process.html).
 
-- [ ] Add GitHub workflows from
-  [https://github.com/upbound/.github](https://github.com/upbound/.github)
+Most Crossplane projects use [Github Actions](https://docs.github.com/en/actions/learn-github-actions/understanding-github-actions) to build, tag, and promote software releases.
+
+Providers are packaged as OCI (Docker) images and pushed to an OCI registry as part of
+the publish and promotion workflows.
+
+In general, providers should:
+
+- [ ] Utilize GitHub workflows from
+  <https://github.com/crossplane/provider-template/tree/main/.github/workflows>
 - [ ] Create OCI image repos to push Package and Controller images.
 - [ ] Automatically push Provider images and packages via CI
 - [ ] Add GitHub Secrets to push to Docker repository. (To be performed by
