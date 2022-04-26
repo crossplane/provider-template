@@ -51,7 +51,7 @@ PACKAGE_CONTROLLER_IMAGE="${DOCKER_REGISTRY}/${PROJECT_NAME}-controller:${VERSIO
 K8S_CLUSTER="${K8S_CLUSTER:-${BUILD_REGISTRY}-inttests}"
 
 CROSSPLANE_NAMESPACE="crossplane-system"
-PACKAGE_NAME="provider-aws"
+PACKAGE_NAME="provider-kafka"
 
 # cleanup on exit
 if [ "$skipcleanup" != true ]; then
