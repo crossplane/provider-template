@@ -19,17 +19,20 @@ guide.
 
 ## Repository
 
-It is recommended to use the
-[crossplane-contrib](https://github.com/orgs/crossplane-contrib) Github
-Organization. Your project should be named `provider-<name>`. Members of the
-Crossplane community are happy to create a repository and configure access.
-Please open an issue in the Crossplane [org](https://github.com/crossplane/org)
-repository or reach out to the Crossplane
+Although providers can be hosted in any source code repository, the [crossplane-contrib](https://github.com/orgs/crossplane-contrib) Github Organization is available as a neutral home that is under Crossplane's project [governance](https://github.com/crossplane/crossplane/blob/master/GOVERNANCE.md).
+
+Members of the Crossplane community are happy to create a repository in the *crossplane-contrib* organization and configure access, continuous integration, and storage
+for software artifacts. Please open an issue in the Crossplane
+[org](https://github.com/crossplane/org) repository or reach out to the Crossplane
 [#dev](https://crossplane.slack.com/archives/CEF5N8X08) channel.
 
+Generally projects are named `provider-<name>`, with `name` being the API being
+managed. Example project names are `provider-aws`, `provider-kubernetes`,
+and `provider-github`.
+
 The [provider-template](https://github.com/crossplane/provider-template) repository can be
-used as a starting point for new providers. For [terrajet]-based providers, the
-[provider-jet-template](https://github.com/crossplane-contrib/provider-jet-template) is 
+used as a starting point for new providers. For [terrajet](https://github.com/crossplane/terrajet)-based providers, the
+[provider-jet-template](https://github.com/crossplane-contrib/provider-jet-template) is
 available.
 
 ## Files
