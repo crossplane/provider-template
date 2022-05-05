@@ -32,6 +32,11 @@ echo_error(){
     exit 1
 }
 
+
+# The name of your provider. Many provider Makefiles override this value.
+PACKAGE_NAME="provider-template"
+
+
 # ------------------------------
 projectdir="$( cd "$( dirname "${BASH_SOURCE[0]}")"/../.. && pwd )"
 
@@ -51,7 +56,6 @@ PACKAGE_CONTROLLER_IMAGE="${DOCKER_REGISTRY}/${PROJECT_NAME}-controller:${VERSIO
 K8S_CLUSTER="${K8S_CLUSTER:-${BUILD_REGISTRY}-inttests}"
 
 CROSSPLANE_NAMESPACE="crossplane-system"
-PACKAGE_NAME="provider-kafka"
 
 # cleanup on exit
 if [ "$skipcleanup" != true ]; then
