@@ -93,6 +93,42 @@ dev-clean: $(KIND) $(KUBECTL)
 # ====================================================================================
 # Special Targets
 
+# Install gomplate
+GOMPLATE_VERSION := 3.10.0
+GOMPLATE := $(TOOLS_HOST_DIR)/gomplate-$(GOMPLATE_VERSION)
+
+$(GOMPLATE):
+	@$(INFO) installing gomplate $(SAFEHOSTPLATFORM)
+	@curl -fsSLo $(GOMPLATE) https://github.com/hairyhenderson/gomplate/releases/download/v$(GOMPLATE_VERSION)/gomplate_$(SAFEHOSTPLATFORM) || $(FAIL)
+	@chmod +x $(GOMPLATE)
+	@$(OK) installing gomplate $(SAFEHOSTPLATFORM)
+
+export GOMPLATE
+
+# This target prepares repo for your provider by replacing all "template"
+# occurrences with your provider name.
+# This target can only be run once, if you want to rerun for some reason,
+# consider stashing/resetting your git state.
+# Arguments:
+#   provider: Camel case name of your provider, e.g. GitHub, PlanetScale
+provider.prepare:
+	@[ "${provider}" ] || ( echo "argument \"provider\" is not set"; exit 1 )
+	@PROVIDER=$(provider) ./hack/helpers/prepare.sh
+
+# This target adds a new api type and its controller.
+# You would still need to register new api in "apis/<provider>.go" and
+# controller in "internal/controller/<provider>.go".
+# Arguments:
+#   provider: Camel case name of your provider, e.g. GitHub, PlanetScale
+#   group: API group for the type you want to add.
+#   kind: Kind of the type you want to add
+#	apiversion: API version of the type you want to add. Optional and defaults to "v1alpha1"
+provider.addtype: $(GOMPLATE)
+	@[ "${provider}" ] || ( echo "argument \"provider\" is not set"; exit 1 )
+	@[ "${group}" ] || ( echo "argument \"group\" is not set"; exit 1 )
+	@[ "${kind}" ] || ( echo "argument \"kind\" is not set"; exit 1 )
+	@PROVIDER=$(provider) GROUP=$(group) KIND=$(kind) APIVERSION=$(apiversion) ./hack/helpers/addtype.sh
+
 define CROSSPLANE_MAKE_HELP
 Crossplane Targets:
     submodules            Update the submodules, such as the common build scripts.
