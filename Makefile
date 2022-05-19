@@ -99,6 +99,7 @@ GOMPLATE := $(TOOLS_HOST_DIR)/gomplate-$(GOMPLATE_VERSION)
 
 $(GOMPLATE):
 	@$(INFO) installing gomplate $(SAFEHOSTPLATFORM)
+	@mkdir -p $(TOOLS_HOST_DIR)
 	@curl -fsSLo $(GOMPLATE) https://github.com/hairyhenderson/gomplate/releases/download/v$(GOMPLATE_VERSION)/gomplate_$(SAFEHOSTPLATFORM) || $(FAIL)
 	@chmod +x $(GOMPLATE)
 	@$(OK) installing gomplate $(SAFEHOSTPLATFORM)
