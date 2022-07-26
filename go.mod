@@ -3,7 +3,7 @@ module github.com/crossplane/provider-template
 go 1.17
 
 require (
-	github.com/crossplane/crossplane-runtime v0.15.0
+	github.com/crossplane/crossplane-runtime v0.17.0
 	github.com/crossplane/crossplane-tools v0.0.0-20220310165030-1f43fc12793e
 	github.com/google/go-cmp v0.5.6
 	github.com/pkg/errors v0.9.1
@@ -111,5 +111,3 @@ require (
 	sigs.k8s.io/structured-merge-diff/v4 v4.2.0 // indirect
 	sigs.k8s.io/yaml v1.3.0 // indirect
 )
-
-replace github.com/crossplane/crossplane-runtime => github.com/turkenh/crossplane-runtime v0.0.0-20220314141040-6f74175d3c1f
