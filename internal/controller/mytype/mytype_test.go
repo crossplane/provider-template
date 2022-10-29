@@ -59,8 +59,8 @@ func TestObserve(t *testing.T) {
 		// TODO: Add test cases.
 	}
 
-	for name, testcase := range cases {
-		tc := testcase
+	for name, tc := range cases {
+		tc := tc
 		t.Run(name, func(t *testing.T) {
 			e := external{service: tc.fields.service}
 			got, err := e.Observe(tc.args.ctx, tc.args.mg)
