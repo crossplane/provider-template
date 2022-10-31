@@ -108,12 +108,10 @@ linters:
     - govet
     - gocyclo
     - gocritic
-    - interfacer
     - goconst
     - goimports
     - gofmt  # We enable this as well as goimports for its simplify mode.
     - prealloc
-    - golint
     - unconvert
     - misspell
     - nakedret
@@ -134,7 +132,7 @@ issues:
         - errcheck
         - dupl
         - gosec
-        - scopelint
+        - exportloopref
         - unparam
     
     # Ease some gocritic warnings on test files.
