@@ -12,10 +12,18 @@ with the following features that are meant to be refactored:
 ## Developing
 
 1. Use this repository as a template to create a new one.
-1. Find-and-replace `provider-template` with your provider's name.
-1. Run `make` to initialize the "build" Make submodule we use for CI/CD.
-1. Run `make reviewable` to run code generation, linters, and tests.
-1. Replace `MyType` with your own managed resource implementation(s).
+1. Rename the provider by running the follwing command:
+```
+  make provider.prepare provider={PascalProviderName}
+```
+3. Add your new type by running the following command:
+```
+make provider.addtype provider={PascalProviderName} group={ApiGroup} kind={Type}
+```
+4. Replace the *sample* group with your new group in apis/{provider}.go
+3. Run `make` to initialize the "build" Make submodule we use for CI/CD.
+3. Run `make reviewable` to run code generation, linters, and tests.
+3. Replace `MyType` with your own managed resource implementation(s).
 
 Refer to Crossplane's [CONTRIBUTING.md] file for more information on how the
 Crossplane community prefers to work. The [Provider Development][provider-dev]
