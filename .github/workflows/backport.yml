@@ -15,8 +15,8 @@ jobs:
   # one. Many do not support merge commits, or do not support pull requests with
   # more than one commit. This one does. It also handily links backport PRs with
   # new PRs, and provides commentary and instructions when it can't backport.
-  # The main gotchas with this action are that it _only_ supports merge commits,
-  # and that PRs _must_ be labelled before they're merged to trigger a backport.
+  # The main gotcha with this action is that PRs _must_ be labelled before they're
+  # merged to trigger a backport.
   open-pr:
     runs-on: ubuntu-22.04
     if: github.event.pull_request.merged
