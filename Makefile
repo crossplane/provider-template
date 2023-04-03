@@ -6,10 +6,14 @@ PROJECT_REPO := github.com/crossplane/$(PROJECT_NAME)
 PLATFORMS ?= linux_amd64 linux_arm64
 -include build/makelib/common.mk
 
+# ====================================================================================
 # Setup Output
+
 -include build/makelib/output.mk
 
+# ====================================================================================
 # Setup Go
+
 NPROCS ?= 1
 GO_TEST_PARALLEL := $(shell echo $$(( $(NPROCS) / 2 )))
 GO_STATIC_PACKAGES = $(GO_PROJECT)/cmd/provider
@@ -18,17 +22,30 @@ GO_SUBDIRS += cmd internal apis
 GO111MODULE = on
 -include build/makelib/golang.mk
 
-# kind-related versions
-KIND_VERSION ?= v0.12.0
-KIND_NODE_IMAGE_TAG ?= v1.23.4
-
+# ====================================================================================
 # Setup Kubernetes tools
+
 -include build/makelib/k8s_tools.mk
 
+# ====================================================================================
 # Setup Images
-DOCKER_REGISTRY ?= crossplane
-IMAGES = $(PROJECT_NAME) $(PROJECT_NAME)-controller
--include build/makelib/image.mk
+
+IMAGES = provider-template
+-include build/makelib/imagelight.mk
+
+# ====================================================================================
+# Setup XPKG
+
+XPKG_REG_ORGS ?= xpkg.upbound.io/crossplane
+# NOTE(hasheddan): skip promoting on xpkg.upbound.io as channel tags are
+# inferred.
+XPKG_REG_ORGS_NO_PROMOTE ?= xpkg.upbound.io/crossplane
+XPKGS = provider-template
+-include build/makelib/xpkg.mk
+
+# NOTE(hasheddan): we force image building to happen prior to xpkg build so that
+# we ensure image is present in daemon.
+xpkg.build.provider-template: do.build.images
 
 fallthrough: submodules
 	@echo Initial setup complete. Running make again . . .
@@ -56,6 +73,11 @@ submodules:
 # identify its location in CI so that we cache between builds.
 go.cachedir:
 	@go env GOCACHE
+
+# NOTE(hasheddan): we must ensure up is installed in tool cache prior to build
+# as including the k8s_tools machinery prior to the xpkg machinery sets UP to
+# point to tool cache.
+build.init: $(UP)
 
 # This is for running out-of-cluster locally, and is for convenience. Running
 # this make target will print out the command which was used. For more control,
