@@ -8,7 +8,3 @@ metadata:
     meta.crossplane.io/license: Apache-2.0
     meta.crossplane.io/description: |
       A template that can be used to create Crossplane providers.
-
-spec:
-  controller:
-    image: DOCKER_REGISTRY/provider-template-controller:VERSION
