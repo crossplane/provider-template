@@ -32,7 +32,8 @@ type MyTypeParameters struct {
 
 // MyTypeObservation are the observable fields of a MyType.
 type MyTypeObservation struct {
-	ObservableField string `json:"observableField,omitempty"`
+	ConfigurableField string `json:"configurableField"`
+	ObservableField   string `json:"observableField,omitempty"`
 }
 
 // A MyTypeSpec defines the desired state of a MyType.

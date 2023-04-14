@@ -265,8 +265,12 @@ spec:
               atProvider:
                 description: MyTypeObservation are the observable fields of a MyType.
                 properties:
+                  configurableField:
+                    type: string
                   observableField:
                     type: string
+                required:
+                - configurableField
                 type: object
               conditions:
                 description: Conditions of the resource.

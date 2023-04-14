@@ -18,7 +18,6 @@ package main
 
 import (
 	"context"
-	"github.com/crossplane/provider-template/internal/features"
 	"os"
 	"path/filepath"
 	"time"
@@ -40,6 +39,7 @@ import (
 	"github.com/crossplane/provider-template/apis"
 	"github.com/crossplane/provider-template/apis/v1alpha1"
 	template "github.com/crossplane/provider-template/internal/controller"
+	"github.com/crossplane/provider-template/internal/features"
 )
 
 func main() {
