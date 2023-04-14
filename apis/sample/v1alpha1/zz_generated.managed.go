@@ -29,6 +29,11 @@ func (mg *MyType) GetDeletionPolicy() xpv1.DeletionPolicy {
 	return mg.Spec.DeletionPolicy
 }
 
+// GetManagementPolicy of this MyType.
+func (mg *MyType) GetManagementPolicy() xpv1.ManagementPolicy {
+	return mg.Spec.ManagementPolicy
+}
+
 // GetProviderConfigReference of this MyType.
 func (mg *MyType) GetProviderConfigReference() *xpv1.Reference {
 	return mg.Spec.ProviderConfigReference
@@ -60,6 +65,11 @@ func (mg *MyType) SetConditions(c ...xpv1.Condition) {
 // SetDeletionPolicy of this MyType.
 func (mg *MyType) SetDeletionPolicy(r xpv1.DeletionPolicy) {
 	mg.Spec.DeletionPolicy = r
+}
+
+// SetManagementPolicy of this MyType.
+func (mg *MyType) SetManagementPolicy(r xpv1.ManagementPolicy) {
+	mg.Spec.ManagementPolicy = r
 }
 
 // SetProviderConfigReference of this MyType.
