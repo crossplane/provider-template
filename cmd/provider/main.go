@@ -18,6 +18,7 @@ package main
 
 import (
 	"context"
+	"github.com/crossplane/provider-template/internal/features"
 	"os"
 	"path/filepath"
 	"time"
@@ -39,7 +40,6 @@ import (
 	"github.com/crossplane/provider-template/apis"
 	"github.com/crossplane/provider-template/apis/v1alpha1"
 	template "github.com/crossplane/provider-template/internal/controller"
-	"github.com/crossplane/provider-template/internal/controller/features"
 )
 
 func main() {
@@ -54,6 +54,7 @@ func main() {
 
 		namespace                  = app.Flag("namespace", "Namespace used to set as default scope in default secret store config.").Default("crossplane-system").Envar("POD_NAMESPACE").String()
 		enableExternalSecretStores = app.Flag("enable-external-secret-stores", "Enable support for ExternalSecretStores.").Default("false").Envar("ENABLE_EXTERNAL_SECRET_STORES").Bool()
+		enableManagementPolicies   = app.Flag("enable-management-policies", "Enable support for Management Policies.").Default("false").Envar("ENABLE_MANAGEMENT_POLICIES").Bool()
 	)
 	kingpin.MustParse(app.Parse(os.Args[1:]))
 
@@ -113,6 +114,11 @@ func main() {
 				},
 			},
 		})), "cannot create default store config")
+	}
+
+	if *enableManagementPolicies {
+		o.Features.Enable(features.EnableAlphaManagementPolicies)
+		log.Info("Alpha feature enabled", "flag", features.EnableAlphaManagementPolicies)
 	}
 
 	kingpin.FatalIfError(template.Setup(mgr, o), "Cannot setup Template controllers")

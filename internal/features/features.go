@@ -24,4 +24,9 @@ const (
 	// External Secret Stores. See the below design for more details.
 	// https://github.com/crossplane/crossplane/blob/390ddd/design/design-doc-external-secret-stores.md
 	EnableAlphaExternalSecretStores feature.Flag = "EnableAlphaExternalSecretStores"
+
+	// EnableAlphaManagementPolicies enables alpha support for
+	// Management Policies. See the below design for more details.
+	// https://github.com/crossplane/crossplane/blob/master/design/design-doc-observe-only-resources.md
+	EnableAlphaManagementPolicies feature.Flag = "EnableAlphaManagementPolicies"
 )
