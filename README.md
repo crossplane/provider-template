@@ -32,4 +32,4 @@ Crossplane community prefers to work. The [Provider Development][provider-dev]
 guide may also be of use.
 
 [CONTRIBUTING.md]: https://github.com/crossplane/crossplane/blob/master/CONTRIBUTING.md
-[provider-dev]: https://github.com/crossplane/crossplane/blob/master/docs/contributing/provider_development_guide.md
+[provider-dev]: https://github.com/crossplane/crossplane/blob/master/contributing/guide-provider-development.md
