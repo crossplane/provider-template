@@ -142,7 +142,7 @@ provider.addtype: $(GOMPLATE)
 	@[ "${provider}" ] || ( echo "argument \"provider\" is not set"; exit 1 )
 	@[ "${group}" ] || ( echo "argument \"group\" is not set"; exit 1 )
 	@[ "${kind}" ] || ( echo "argument \"kind\" is not set"; exit 1 )
-	@PROVIDER=$(provider) GROUP=$(group) KIND=$(kind) APIVERSION=$(apiversion) ./hack/helpers/addtype.sh
+	@PROVIDER=$(provider) GROUP=$(group) KIND=$(kind) APIVERSION=$(apiversion) PROJECT_REPO=$(PROJECT_REPO) ./hack/helpers/addtype.sh
 
 define CROSSPLANE_MAKE_HELP
 Crossplane Targets:

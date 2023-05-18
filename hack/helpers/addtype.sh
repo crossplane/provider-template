@@ -25,6 +25,7 @@ export GROUP
 export KIND
 export APIVERSION
 export PROVIDER
+export PROJECT_REPO
 
 kind_lower=$(echo "${KIND}" | tr "[:upper:]" "[:lower:]")
 group_lower=$(echo "${GROUP}" | tr "[:upper:]" "[:lower:]")
