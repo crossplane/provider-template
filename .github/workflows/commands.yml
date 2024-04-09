@@ -81,12 +81,6 @@ jobs:
 
     - name: Checkout
       uses: actions/checkout@v3
-      with:
-        fetch-depth: 0
 
     - name: Open Backport PR
-      uses: zeebe-io/backport-action@v0.0.4
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        github_workspace: ${{ github.workspace }}
-        version: v0.0.4
+      uses: korthout/backport-action@v1

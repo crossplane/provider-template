@@ -32,9 +32,9 @@ import (
 	"github.com/crossplane/crossplane-runtime/pkg/reconciler/managed"
 	"github.com/crossplane/crossplane-runtime/pkg/resource"
 
-	"github.com/crossplane/provider-{{ .Env.PROVIDER | strings.ToLower }}/apis/{{ .Env.GROUP | strings.ToLower }}/{{ .Env.APIVERSION | strings.ToLower }}"
-	apisv1alpha1 "github.com/crossplane/provider-{{ .Env.PROVIDER | strings.ToLower }}/apis/v1alpha1"
-	"github.com/crossplane/provider-{{ .Env.PROVIDER | strings.ToLower }}/internal/controller/features"
+	"{{ .Env.PROJECT_REPO | strings.ToLower }}/apis/{{ .Env.GROUP | strings.ToLower }}/{{ .Env.APIVERSION | strings.ToLower }}"
+	apisv1alpha1 "{{ .Env.PROJECT_REPO | strings.ToLower }}/apis/v1alpha1"
+	"{{ .Env.PROJECT_REPO | strings.ToLower }}/internal/features"
 )
 
 const (
@@ -69,12 +69,14 @@ func Setup(mgr ctrl.Manager, o controller.Options) error {
 			usage:        resource.NewProviderConfigUsageTracker(mgr.GetClient(), &apisv1alpha1.ProviderConfigUsage{}),
 			newServiceFn: newNoOpService}),
 		managed.WithLogger(o.Logger.WithValues("controller", name)),
+		managed.WithPollInterval(o.PollInterval),
 		managed.WithRecorder(event.NewAPIRecorder(mgr.GetEventRecorderFor(name))),
 		managed.WithConnectionPublishers(cps...))
 
 	return ctrl.NewControllerManagedBy(mgr).
 		Named(name).
 		WithOptions(o.ForControllerRuntime()).
+		WithEventFilter(resource.DesiredStateChanged()).
 		For(&v1alpha1.{{ .Env.KIND }}{}).
 		Complete(ratelimiter.NewReconciler(name, r, o.GlobalRateLimiter))
 }

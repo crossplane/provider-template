@@ -39,4 +39,3 @@ git clean -fd
 git mv "apis/template.go" "apis/${ProviderNameLower}.go"
 git mv "internal/controller/template.go" "internal/controller/${ProviderNameLower}.go"
 git mv "cluster/images/provider-template" "cluster/images/provider-${ProviderNameLower}"
-git mv "cluster/images/provider-template-controller" "cluster/images/provider-${ProviderNameLower}-controller"
