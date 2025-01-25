@@ -20,7 +20,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/crossplane/crossplane-runtime/pkg/feature"
 	"github.com/pkg/errors"
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -77,10 +76,6 @@ func Setup(mgr ctrl.Manager, o controller.Options) error {
 
 	if o.Features.Enabled(features.EnableAlphaManagementPolicies) {
 		opts = append(opts, managed.WithManagementPolicies())
-	}
-
-	if o.Features.Enabled(feature.EnableAlphaChangeLogs) {
-		opts = append(opts, managed.WithChangeLogger(o.ChangeLogOptions.ChangeLogger))
 	}
 
 	if o.MetricOptions != nil {
