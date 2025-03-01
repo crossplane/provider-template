@@ -193,13 +193,17 @@ func (c *external) Update(ctx context.Context, mg resource.Managed) (managed.Ext
 	}, nil
 }
 
-func (c *external) Delete(ctx context.Context, mg resource.Managed) error {
+func (c *external) Delete(ctx context.Context, mg resource.Managed) (managed.ExternalDelete, error) {
 	cr, ok := mg.(*v1alpha1.MyType)
 	if !ok {
-		return errors.New(errNotMyType)
+		return managed.ExternalDelete{}, errors.New(errNotMyType)
 	}
 
 	fmt.Printf("Deleting: %+v", cr)
 
+	return managed.ExternalDelete{}, nil
+}
+
+func (c *external) Disconnect(ctx context.Context) error {
 	return nil
 }
