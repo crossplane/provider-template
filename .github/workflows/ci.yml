@@ -76,8 +76,7 @@ jobs:
         uses: golangci/golangci-lint-action@v3
         with:
           version: ${{ env.GOLANGCI_VERSION }}
-          args: |
-            - --out-format=colored-line-number
+          args: --out-format=colored-line-number
 
   check-diff:
     runs-on: ubuntu-22.04
