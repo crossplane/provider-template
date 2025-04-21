@@ -12,7 +12,7 @@ env:
   # Common versions
   GO_VERSION: '1.23'
   GOLANGCI_VERSION: 'v2.1.2'
-  DOCKER_BUILDX_VERSION: 'v0.9.1'
+  DOCKER_BUILDX_VERSION: 'v0.23.0'
 
   # Common users. We can't run a step 'if secrets.XXX != ""' but we can run a
   # step 'if env.XXX' != ""', so we copy these to succinctly test whether
@@ -185,7 +185,7 @@ jobs:
           platforms: all
 
       - name: Setup Docker Buildx
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v3
         with:
           version: ${{ env.DOCKER_BUILDX_VERSION }}
           install: true
