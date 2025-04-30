@@ -19,6 +19,7 @@ package mytype
 import (
 	"context"
 	"fmt"
+
 	"github.com/crossplane/crossplane-runtime/pkg/feature"
 
 	"github.com/pkg/errors"

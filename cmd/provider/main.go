@@ -19,12 +19,12 @@ package main
 import (
 	"context"
 	"fmt"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
 	"os"
 	"path/filepath"
 	"time"
 
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 	"gopkg.in/alecthomas/kingpin.v2"
 	kerrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -43,12 +43,12 @@ import (
 	"github.com/crossplane/crossplane-runtime/pkg/reconciler/managed"
 	"github.com/crossplane/crossplane-runtime/pkg/resource"
 	"github.com/crossplane/crossplane-runtime/pkg/statemetrics"
-	"github.com/crossplane/provider-template/internal/version"
 
 	"github.com/crossplane/provider-template/apis"
 	"github.com/crossplane/provider-template/apis/v1alpha1"
 	template "github.com/crossplane/provider-template/internal/controller"
 	"github.com/crossplane/provider-template/internal/features"
+	"github.com/crossplane/provider-template/internal/version"
 )
 
 func main() {
