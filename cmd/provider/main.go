@@ -67,6 +67,7 @@ func main() {
 		enableExternalSecretStores = app.Flag("enable-external-secret-stores", "Enable support for ExternalSecretStores.").Default("false").Envar("ENABLE_EXTERNAL_SECRET_STORES").Bool()
 		enableManagementPolicies   = app.Flag("enable-management-policies", "Enable support for Management Policies.").Default("false").Envar("ENABLE_MANAGEMENT_POLICIES").Bool()
 		enableChangeLogs           = app.Flag("enable-change-logs", "Enable support for capturing change logs during reconciliation.").Default("false").Envar("ENABLE_CHANGE_LOGS").Bool()
+		socketPath                 = app.Flag("socket-path", "Path to create a Unix domain socket for change logs gRPC.").Default("/var/run/changelogs/changelogs.sock").Envar("SOCKET_PATH").String()
 	)
 	kingpin.MustParse(app.Parse(os.Args[1:]))
 
@@ -151,10 +152,9 @@ func main() {
 	if *enableChangeLogs {
 		o.Features.Enable(feature.EnableAlphaChangeLogs)
 		log.Info("Alpha feature enabled", "flag", feature.EnableAlphaChangeLogs)
-		socketPath := "/var/run/changelogs/changelogs.sock"
 
-		conn, err := grpc.NewClient("unix://"+socketPath, grpc.WithTransportCredentials(insecure.NewCredentials()))
-		kingpin.FatalIfError(err, "failed to create change logs client connection")
+		conn, err := grpc.NewClient("unix://"+*socketPath, grpc.WithTransportCredentials(insecure.NewCredentials()))
+		kingpin.FatalIfError(err, "failed to create change logs client connection in %s", *socketPath)
 
 		clo := controller.ChangeLogOptions{
 			ChangeLogger: managed.NewGRPCChangeLogger(
