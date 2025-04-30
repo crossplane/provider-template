@@ -32,7 +32,8 @@ type {{ .Env.KIND }}Parameters struct {
 
 // {{ .Env.KIND }}Observation are the observable fields of a {{ .Env.KIND }}.
 type {{ .Env.KIND }}Observation struct {
-	ObservableField string `json:"observableField,omitempty"`
+	ConfigurableField string `json:"configurableField"`
+	ObservableField   string `json:"observableField,omitempty"`
 }
 
 // A {{ .Env.KIND }}Spec defines the desired state of a {{ .Env.KIND }}.
