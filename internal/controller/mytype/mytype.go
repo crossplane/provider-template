@@ -1,5 +1,5 @@
 /*
-Copyright 2020 The Crossplane Authors.
+Copyright 2025 The Crossplane Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -74,10 +74,7 @@ func Setup(mgr ctrl.Manager, o controller.Options) error {
 		managed.WithPollInterval(o.PollInterval),
 		managed.WithRecorder(event.NewAPIRecorder(mgr.GetEventRecorderFor(name))),
 		managed.WithConnectionPublishers(cps...),
-	}
-
-	if o.Features.Enabled(features.EnableAlphaManagementPolicies) {
-		opts = append(opts, managed.WithManagementPolicies())
+		managed.WithManagementPolicies(),
 	}
 
 	if o.Features.Enabled(feature.EnableAlphaChangeLogs) {
