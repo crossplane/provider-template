@@ -159,7 +159,7 @@ func main() {
 		clo := controller.ChangeLogOptions{
 			ChangeLogger: managed.NewGRPCChangeLogger(
 				changelogsv1alpha1.NewChangeLogServiceClient(conn),
-				managed.WithProviderVersion(fmt.Sprintf("provider-template: %s", version.Version))),
+				managed.WithProviderVersion(fmt.Sprintf("provider-template:%s", version.Version))),
 		}
 		o.ChangeLogOptions = &clo
 	}
