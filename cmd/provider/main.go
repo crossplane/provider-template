@@ -19,6 +19,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"time"
@@ -74,10 +75,14 @@ func main() {
 	zl := zap.New(zap.UseDevMode(*debug))
 	log := logging.NewLogrLogger(zl.WithName("provider-template"))
 	if *debug {
-		// The controller-runtime runs with a no-op logger by default. It is
-		// *very* verbose even at info level, so we only provide it a real
-		// logger when we're running in debug mode.
+		// The controller-runtime is *very* verbose even at info level, so we only
+		// provide it a real logger when we're running in debug mode.
 		ctrl.SetLogger(zl)
+	} else {
+		// Setting the controller-runtime logger to a no-op logger by default. This
+		// is not really needed, but otherwise we get a warning from the
+		// controller-runtime.
+		ctrl.SetLogger(zap.New(zap.WriteTo(io.Discard)))
 	}
 
 	cfg, err := ctrl.GetConfig()
