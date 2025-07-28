@@ -19,7 +19,7 @@ jobs:
         allow-edits: "false"
         permission-level: write
     - name: Handle Command
-      uses: actions/github-script@v4
+      uses: actions/github-script@v7
       env:
         POINTS: ${{ steps.command.outputs.command-arguments }}
       with:
