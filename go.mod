@@ -9,11 +9,11 @@ tool sigs.k8s.io/controller-tools/cmd/controller-gen
 tool github.com/crossplane/crossplane-tools/cmd/angryjet
 
 require (
+	github.com/alecthomas/kingpin/v2 v2.4.0
 	github.com/crossplane/crossplane-runtime/v2 v2.0.0
 	github.com/google/go-cmp v0.7.0
 	github.com/pkg/errors v0.9.1
 	google.golang.org/grpc v1.74.2
-	gopkg.in/alecthomas/kingpin.v2 v2.2.6
 	k8s.io/apimachinery v0.33.3
 	k8s.io/client-go v0.33.3
 	sigs.k8s.io/controller-runtime v0.21.0
@@ -21,8 +21,6 @@ require (
 
 require (
 	dario.cat/mergo v1.0.1 // indirect
-	github.com/alecthomas/kingpin/v2 v2.4.0 // indirect
-	github.com/alecthomas/template v0.0.0-20190718012654-fb15b899a751 // indirect
 	github.com/alecthomas/units v0.0.0-20240927000941-0f3dac36c52b // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/blang/semver/v4 v4.0.0 // indirect
