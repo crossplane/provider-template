@@ -2,6 +2,7 @@ apiVersion: sample.template.crossplane.io/v1alpha1
 kind: MyType
 metadata:
   name: example
+  namespace: default
 spec:
   forProvider:
     configurableField: test

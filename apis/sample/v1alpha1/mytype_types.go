@@ -22,7 +22,8 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 
-	xpv1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
+	xpv1 "github.com/crossplane/crossplane-runtime/v2/apis/common/v1"
+	xpv2 "github.com/crossplane/crossplane-runtime/v2/apis/common/v2"
 )
 
 // MyTypeParameters are the configurable fields of a MyType.
@@ -38,8 +39,8 @@ type MyTypeObservation struct {
 
 // A MyTypeSpec defines the desired state of a MyType.
 type MyTypeSpec struct {
-	xpv1.ResourceSpec `json:",inline"`
-	ForProvider       MyTypeParameters `json:"forProvider"`
+	xpv2.ManagedResourceSpec `json:",inline"`
+	ForProvider              MyTypeParameters `json:"forProvider"`
 }
 
 // A MyTypeStatus represents the observed state of a MyType.
@@ -56,7 +57,7 @@ type MyTypeStatus struct {
 // +kubebuilder:printcolumn:name="EXTERNAL-NAME",type="string",JSONPath=".metadata.annotations.crossplane\\.io/external-name"
 // +kubebuilder:printcolumn:name="AGE",type="date",JSONPath=".metadata.creationTimestamp"
 // +kubebuilder:subresource:status
-// +kubebuilder:resource:scope=Cluster,categories={crossplane,managed,template}
+// +kubebuilder:resource:scope=Namespaced,categories={crossplane,managed,template}
 type MyType struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`

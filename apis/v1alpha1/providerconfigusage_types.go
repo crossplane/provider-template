@@ -22,7 +22,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 
-	xpv1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
+	xpv1 "github.com/crossplane/crossplane-runtime/v2/apis/common/v1"
 )
 
 // +kubebuilder:object:root=true
@@ -32,7 +32,7 @@ import (
 // +kubebuilder:printcolumn:name="CONFIG-NAME",type="string",JSONPath=".providerConfigRef.name"
 // +kubebuilder:printcolumn:name="RESOURCE-KIND",type="string",JSONPath=".resourceRef.kind"
 // +kubebuilder:printcolumn:name="RESOURCE-NAME",type="string",JSONPath=".resourceRef.name"
-// +kubebuilder:resource:scope=Cluster,categories={crossplane,provider,template}
+// +kubebuilder:resource:scope=Namespaced,categories={crossplane,provider,template}
 type ProviderConfigUsage struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
@@ -61,6 +61,13 @@ var (
 	ProviderConfigUsageListKindAPIVersion   = ProviderConfigUsageListKind + "." + SchemeGroupVersion.String()
 	ProviderConfigUsageListGroupVersionKind = SchemeGroupVersion.WithKind(ProviderConfigUsageListKind)
 )
+
+// GetProviderConfigReference of this ProviderConfigUsage.
+func (pc *ProviderConfigUsage) GetProviderConfigReference() xpv1.ProviderConfigReference {
+	return xpv1.ProviderConfigReference{
+		Name: pc.ProviderConfigReference.Name,
+	}
+}
 
 func init() {
 	SchemeBuilder.Register(&ProviderConfigUsage{}, &ProviderConfigUsageList{})
