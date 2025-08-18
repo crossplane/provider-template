@@ -34,7 +34,7 @@ import (
 	"github.com/crossplane/crossplane-runtime/v2/pkg/resource"
 	"github.com/crossplane/crossplane-runtime/v2/pkg/statemetrics"
 
-	"{{ .Env.PROJECT_REPO | strings.ToLower }}/apis/{{ .Env.GROUP | strings.ToLower }}/{{ .Env.APIVERSION | strings.ToLower }}"
+	{{ .Env.APIVERSION | strings.ToLower }} "{{ .Env.PROJECT_REPO | strings.ToLower }}/apis/{{ .Env.GROUP | strings.ToLower }}/{{ .Env.APIVERSION | strings.ToLower }}"
 	apisv1alpha1 "{{ .Env.PROJECT_REPO | strings.ToLower }}/apis/v1alpha1"
 	"{{ .Env.PROJECT_REPO | strings.ToLower }}/internal/features"
 )
@@ -57,13 +57,9 @@ var (
 
 // Setup adds a controller that reconciles {{ .Env.KIND }} managed resources.
 func Setup(mgr ctrl.Manager, o controller.Options) error {
-	name := managed.ControllerName(v1alpha1.{{ .Env.KIND }}GroupKind)
+	name := managed.ControllerName({{ .Env.APIVERSION | strings.ToLower }}.{{ .Env.KIND }}GroupKind)
 
 	cps := []managed.ConnectionPublisher{managed.NewAPISecretPublisher(mgr.GetClient(), mgr.GetScheme())}
-	// TODO: Update external secret stores support for crossplane-runtime v2
-	// if o.Features.Enabled(features.EnableAlphaExternalSecretStores) {
-	//	cps = append(cps, ???.NewDetailsManager(mgr.GetClient(), apisv1alpha1.StoreConfigGroupVersionKind))
-	// }
 
 	opts := []managed.ReconcilerOption{
 		managed.WithExternalConnecter(&connector{
@@ -87,20 +83,20 @@ func Setup(mgr ctrl.Manager, o controller.Options) error {
 
 	if o.MetricOptions != nil && o.MetricOptions.MRStateMetrics != nil {
 		stateMetricsRecorder := statemetrics.NewMRStateRecorder(
-			mgr.GetClient(), o.Logger, o.MetricOptions.MRStateMetrics, &v1alpha1.{{ .Env.KIND }}List{}, o.MetricOptions.PollStateMetricInterval,
+			mgr.GetClient(), o.Logger, o.MetricOptions.MRStateMetrics, &{{ .Env.APIVERSION | strings.ToLower }}.{{ .Env.KIND }}List{}, o.MetricOptions.PollStateMetricInterval,
 		)
 		if err := mgr.Add(stateMetricsRecorder); err != nil {
-			return errors.Wrap(err, "cannot register MR state metrics recorder for kind v1alpha1.{{ .Env.KIND }}List")
+			return errors.Wrap(err, "cannot register MR state metrics recorder for kind {{ .Env.APIVERSION | strings.ToLower }}.{{ .Env.KIND }}List")
 		}
 	}
 
-	r := managed.NewReconciler(mgr, resource.ManagedKind(v1alpha1.{{ .Env.KIND }}GroupVersionKind), opts...)
+	r := managed.NewReconciler(mgr, resource.ManagedKind({{ .Env.APIVERSION | strings.ToLower }}.{{ .Env.KIND }}GroupVersionKind), opts...)
 
 	return ctrl.NewControllerManagedBy(mgr).
 		Named(name).
 		WithOptions(o.ForControllerRuntime()).
 		WithEventFilter(resource.DesiredStateChanged()).
-		For(&v1alpha1.{{ .Env.KIND }}{}).
+		For(&{{ .Env.APIVERSION | strings.ToLower }}.{{ .Env.KIND }}{}).
 		Complete(ratelimiter.NewReconciler(name, r, o.GlobalRateLimiter))
 }
 
@@ -118,7 +114,7 @@ type connector struct {
 // 3. Getting the credentials specified by the ProviderConfig.
 // 4. Using the credentials to form a client.
 func (c *connector) Connect(ctx context.Context, mg resource.Managed) (managed.ExternalClient, error) {
-	cr, ok := mg.(*v1alpha1.{{ .Env.KIND }})
+	cr, ok := mg.(*{{ .Env.APIVERSION | strings.ToLower }}.{{ .Env.KIND }})
 	if !ok {
 		return nil, errors.New(errNot{{ .Env.KIND }})
 	}
@@ -155,7 +151,7 @@ type external struct {
 }
 
 func (c *external) Observe(ctx context.Context, mg resource.Managed) (managed.ExternalObservation, error) {
-	cr, ok := mg.(*v1alpha1.{{ .Env.KIND }})
+	cr, ok := mg.(*{{ .Env.APIVERSION | strings.ToLower }}.{{ .Env.KIND }})
 	if !ok {
 		return managed.ExternalObservation{}, errors.New(errNot{{ .Env.KIND }})
 	}
@@ -181,7 +177,7 @@ func (c *external) Observe(ctx context.Context, mg resource.Managed) (managed.Ex
 }
 
 func (c *external) Create(ctx context.Context, mg resource.Managed) (managed.ExternalCreation, error) {
-	cr, ok := mg.(*v1alpha1.{{ .Env.KIND }})
+	cr, ok := mg.(*{{ .Env.APIVERSION | strings.ToLower }}.{{ .Env.KIND }})
 	if !ok {
 		return managed.ExternalCreation{}, errors.New(errNot{{ .Env.KIND }})
 	}
@@ -196,7 +192,7 @@ func (c *external) Create(ctx context.Context, mg resource.Managed) (managed.Ext
 }
 
 func (c *external) Update(ctx context.Context, mg resource.Managed) (managed.ExternalUpdate, error) {
-	cr, ok := mg.(*v1alpha1.{{ .Env.KIND }})
+	cr, ok := mg.(*{{ .Env.APIVERSION | strings.ToLower }}.{{ .Env.KIND }})
 	if !ok {
 		return managed.ExternalUpdate{}, errors.New(errNot{{ .Env.KIND }})
 	}
@@ -211,7 +207,7 @@ func (c *external) Update(ctx context.Context, mg resource.Managed) (managed.Ext
 }
 
 func (c *external) Delete(ctx context.Context, mg resource.Managed) (managed.ExternalDelete, error) {
-	cr, ok := mg.(*v1alpha1.{{ .Env.KIND }})
+	cr, ok := mg.(*{{ .Env.APIVERSION | strings.ToLower }}.{{ .Env.KIND }})
 	if !ok {
 		return managed.ExternalDelete{}, errors.New(errNot{{ .Env.KIND }})
 	}

@@ -58,21 +58,18 @@ var (
 func Setup(mgr ctrl.Manager, o controller.Options) error {
 	name := managed.ControllerName(v1alpha1.MyTypeGroupKind)
 
-	// TODO: Update connection publishers support for crossplane-runtime v2
-	// cps := []managed.ConnectionPublisher{managed.NewAPISecretPublisher(mgr.GetClient(), mgr.GetScheme())}
-	// if o.Features.Enabled(features.EnableAlphaExternalSecretStores) {
-	//	cps = append(cps, ???.NewDetailsManager(mgr.GetClient(), apisv1alpha1.StoreConfigGroupVersionKind))
-	// }
-
 	opts := []managed.ReconcilerOption{
-		managed.WithExternalConnecter(&connector{
+		managed.WithExternalConnector(&connector{
 			kube:         mgr.GetClient(),
 			usage:        nil, // TODO: Fix usage tracking for v2 compatibility
 			newServiceFn: newNoOpService}),
 		managed.WithLogger(o.Logger.WithValues("controller", name)),
 		managed.WithPollInterval(o.PollInterval),
 		managed.WithRecorder(event.NewAPIRecorder(mgr.GetEventRecorderFor(name))),
-		managed.WithManagementPolicies(),
+	}
+
+	if o.Features.Enabled(feature.EnableBetaManagementPolicies) {
+		opts = append(opts, managed.WithManagementPolicies())
 	}
 
 	if o.Features.Enabled(feature.EnableAlphaChangeLogs) {

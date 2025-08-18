@@ -45,7 +45,7 @@ type {{ .Env.KIND }}Spec struct {
 // A {{ .Env.KIND }}Status represents the observed state of a {{ .Env.KIND }}.
 type {{ .Env.KIND }}Status struct {
 	xpv2.ResourceStatus `json:",inline"`
-	AtProvider              {{ .Env.KIND }}Observation `json:"atProvider,omitempty"`
+	AtProvider          {{ .Env.KIND }}Observation `json:"atProvider,omitempty"`
 }
 
 // +kubebuilder:object:root=true
