@@ -8,3 +8,4 @@ spec:
     configurableField: test
   providerConfigRef:
     name: example
+    kind: ProviderConfig

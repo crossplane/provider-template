@@ -123,7 +123,7 @@ func main() {
 
 	if *enableManagementPolicies {
 		o.Features.Enable(feature.EnableBetaManagementPolicies)
-		log.Info("Alpha feature enabled", "flag", feature.EnableBetaManagementPolicies)
+		log.Info("Beta feature enabled", "flag", feature.EnableBetaManagementPolicies)
 	}
 
 	if *enableChangeLogs {
