@@ -1,12 +1,12 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: crossplane-system
+  name: default
 ---
 apiVersion: v1
 kind: Secret
 metadata:
-  namespace: crossplane-system
+  namespace: default
   name: example-provider-secret
 type: Opaque
 data:
@@ -16,10 +16,11 @@ apiVersion: template.crossplane.io/v1alpha1
 kind: ProviderConfig
 metadata:
   name: example
+  namespace: default
 spec:
   credentials:
     source: Secret
     secretRef:
-      namespace: crossplane-system
+      namespace: default
       name: example-provider-secret
       key: credentials

@@ -4,33 +4,28 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.18.0
-  name: providerconfigs.template.crossplane.io
+  name: clusterproviderconfigs.template.crossplane.io
 spec:
   group: template.crossplane.io
   names:
-    categories:
-    - crossplane
-    - provider
-    - helm
-    kind: ProviderConfig
-    listKind: ProviderConfigList
-    plural: providerconfigs
-    singular: providerconfig
-  scope: Namespaced
+    kind: ClusterProviderConfig
+    listKind: ClusterProviderConfigList
+    plural: clusterproviderconfigs
+    singular: clusterproviderconfig
+  scope: Cluster
   versions:
   - additionalPrinterColumns:
     - jsonPath: .metadata.creationTimestamp
       name: AGE
       type: date
-    - jsonPath: .spec.credentialsSecretRef.name
+    - jsonPath: .spec.credentials.secretRef.name
       name: SECRET-NAME
       priority: 1
       type: string
     name: v1alpha1
     schema:
       openAPIV3Schema:
-        description: A ProviderConfig configures a Helm 'provider', i.e. a connection
-          to a particular
+        description: A ClusterProviderConfig configures a Template provider.
         properties:
           apiVersion:
             description: |-
