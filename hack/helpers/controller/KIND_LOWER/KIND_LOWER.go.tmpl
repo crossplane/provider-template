@@ -36,7 +36,6 @@ import (
 
 	{{ .Env.APIVERSION | strings.ToLower }} "{{ .Env.PROJECT_REPO | strings.ToLower }}/apis/{{ .Env.GROUP | strings.ToLower }}/{{ .Env.APIVERSION | strings.ToLower }}"
 	apisv1alpha1 "{{ .Env.PROJECT_REPO | strings.ToLower }}/apis/v1alpha1"
-	"{{ .Env.PROJECT_REPO | strings.ToLower }}/internal/features"
 )
 
 const (
@@ -69,8 +68,10 @@ func Setup(mgr ctrl.Manager, o controller.Options) error {
 		managed.WithLogger(o.Logger.WithValues("controller", name)),
 		managed.WithPollInterval(o.PollInterval),
 		managed.WithRecorder(event.NewAPIRecorder(mgr.GetEventRecorderFor(name))),
-		managed.WithConnectionPublishers(cps...),
-		managed.WithManagementPolicies(),
+	}
+
+	if o.Features.Enabled(feature.EnableBetaManagementPolicies) {
+		opts = append(opts, managed.WithManagementPolicies())
 	}
 
 	if o.Features.Enabled(feature.EnableAlphaChangeLogs) {
