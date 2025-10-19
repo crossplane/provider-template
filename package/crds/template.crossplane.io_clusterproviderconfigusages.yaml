@@ -4,7 +4,7 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.18.0
-  name: providerconfigusages.template.crossplane.io
+  name: clusterproviderconfigusages.template.crossplane.io
 spec:
   group: template.crossplane.io
   names:
@@ -12,11 +12,11 @@ spec:
     - crossplane
     - provider
     - template
-    kind: ProviderConfigUsage
-    listKind: ProviderConfigUsageList
-    plural: providerconfigusages
-    singular: providerconfigusage
-  scope: Namespaced
+    kind: ClusterProviderConfigUsage
+    listKind: ClusterProviderConfigUsageList
+    plural: clusterproviderconfigusages
+    singular: clusterproviderconfigusage
+  scope: Cluster
   versions:
   - additionalPrinterColumns:
     - jsonPath: .metadata.creationTimestamp
@@ -34,7 +34,8 @@ spec:
     name: v1alpha1
     schema:
       openAPIV3Schema:
-        description: A ProviderConfigUsage indicates that a resource is using a ProviderConfig.
+        description: A ClusterProviderConfigUsage indicates that a resource is using
+          a ClusterProviderConfig.
         properties:
           apiVersion:
             description: |-

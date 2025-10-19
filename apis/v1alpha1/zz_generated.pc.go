@@ -6,7 +6,27 @@
 
 package v1alpha1
 
-import xpv1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
+import xpv1 "github.com/crossplane/crossplane-runtime/v2/apis/common/v1"
+
+// GetCondition of this ClusterProviderConfig.
+func (p *ClusterProviderConfig) GetCondition(ct xpv1.ConditionType) xpv1.Condition {
+	return p.Status.GetCondition(ct)
+}
+
+// GetUsers of this ClusterProviderConfig.
+func (p *ClusterProviderConfig) GetUsers() int64 {
+	return p.Status.Users
+}
+
+// SetConditions of this ClusterProviderConfig.
+func (p *ClusterProviderConfig) SetConditions(c ...xpv1.Condition) {
+	p.Status.SetConditions(c...)
+}
+
+// SetUsers of this ClusterProviderConfig.
+func (p *ClusterProviderConfig) SetUsers(i int64) {
+	p.Status.Users = i
+}
 
 // GetCondition of this ProviderConfig.
 func (p *ProviderConfig) GetCondition(ct xpv1.ConditionType) xpv1.Condition {

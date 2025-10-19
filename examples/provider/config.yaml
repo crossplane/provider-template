@@ -1,25 +1,38 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: crossplane-system
+  name: default
 ---
 apiVersion: v1
 kind: Secret
 metadata:
-  namespace: crossplane-system
+  namespace: default
   name: example-provider-secret
 type: Opaque
 data:
-  # credentials: BASE64ENCODED_PROVIDER_CREDS
+  credentials: QkFTRTY0RU5DT0RFRF9QUk9WSURFUl9DUkVEUwo=
 ---
 apiVersion: template.crossplane.io/v1alpha1
 kind: ProviderConfig
+metadata:
+  name: example
+  namespace: default
+spec:
+  credentials:
+    source: Secret
+    secretRef:
+      namespace: default
+      name: example-provider-secret
+      key: credentials
+---
+apiVersion: template.crossplane.io/v1alpha1
+kind: ClusterProviderConfig
 metadata:
   name: example
 spec:
   credentials:
     source: Secret
     secretRef:
-      namespace: crossplane-system
+      namespace: default
       name: example-provider-secret
       key: credentials
