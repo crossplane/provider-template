@@ -37,17 +37,3 @@ func SetupGated(mgr ctrl.Manager, o controller.Options) error {
 	}
 	return nil
 }
-
-// Setup creates all Template controllers with the supplied logger and adds them to
-// the supplied manager.
-func Setup(mgr ctrl.Manager, o controller.Options) error {
-	for _, setup := range []func(ctrl.Manager, controller.Options) error{
-		config.Setup,
-		mytype.Setup,
-	} {
-		if err := setup(mgr, o); err != nil {
-			return err
-		}
-	}
-	return nil
-}

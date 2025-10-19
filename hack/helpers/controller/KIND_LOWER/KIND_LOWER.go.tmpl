@@ -39,11 +39,11 @@ import (
 )
 
 const (
-	errNot{{ .Env.KIND }}    = "managed resource is not a {{ .Env.KIND }} custom resource"
+	errNot{{ .Env.KIND }}   = "managed resource is not a {{ .Env.KIND }} custom resource"
 	errTrackPCUsage = "cannot track ProviderConfig usage"
-	errGetPC        = "cannot get ProviderConfig"
-	errGetCPC       = "cannot get ClusterProviderConfig"
-	errGetCreds     = "cannot get credentials"
+	errGetPC    = "cannot get ProviderConfig"
+	errGetCPC   = "cannot get ClusterProviderConfig"
+	errGetCreds = "cannot get credentials"
 
 	errNewClient = "cannot create new Service"
 )
@@ -55,14 +55,21 @@ var (
 	newNoOpService = func(_ []byte) (interface{}, error) { return &NoOpService{}, nil }
 )
 
-// Setup adds a controller that reconciles {{ .Env.KIND }} managed resources.
-func Setup(mgr ctrl.Manager, o controller.Options) error {
-	name := managed.ControllerName({{ .Env.APIVERSION | strings.ToLower }}.{{ .Env.KIND }}GroupKind)
+// SetupGated adds a controller that reconciles {{ .Env.KIND }} managed resources with safe-start support.
+func SetupGated(mgr ctrl.Manager, o controller.Options) error {
+	o.Gate.Register(func() {
+		if err := Setup(mgr, o); err != nil {
+			panic(errors.Wrap(err, "cannot setup {{ .Env.KIND }} controller"))
+		}
+	}, v1alpha1.{{ .Env.KIND }}GroupVersionKind)
+	return nil
+}
 
-	cps := []managed.ConnectionPublisher{managed.NewAPISecretPublisher(mgr.GetClient(), mgr.GetScheme())}
+func Setup(mgr ctrl.Manager, o controller.Options) error {
+	name := managed.ControllerName(v1alpha1.{{ .Env.KIND }}GroupKind)
 
 	opts := []managed.ReconcilerOption{
-		managed.WithExternalConnecter(&connector{
+		managed.WithExternalConnector(&connector{
 			kube:         mgr.GetClient(),
 			usage:        resource.NewProviderConfigUsageTracker(mgr.GetClient(), &apisv1alpha1.ProviderConfigUsage{}),
 			newServiceFn: newNoOpService}),
@@ -85,20 +92,20 @@ func Setup(mgr ctrl.Manager, o controller.Options) error {
 
 	if o.MetricOptions != nil && o.MetricOptions.MRStateMetrics != nil {
 		stateMetricsRecorder := statemetrics.NewMRStateRecorder(
-			mgr.GetClient(), o.Logger, o.MetricOptions.MRStateMetrics, &{{ .Env.APIVERSION | strings.ToLower }}.{{ .Env.KIND }}List{}, o.MetricOptions.PollStateMetricInterval,
+			mgr.GetClient(), o.Logger, o.MetricOptions.MRStateMetrics, &v1alpha1.{{ .Env.KIND }}List{}, o.MetricOptions.PollStateMetricInterval,
 		)
 		if err := mgr.Add(stateMetricsRecorder); err != nil {
-			return errors.Wrap(err, "cannot register MR state metrics recorder for kind {{ .Env.APIVERSION | strings.ToLower }}.{{ .Env.KIND }}List")
+			return errors.Wrap(err, "cannot register MR state metrics recorder for kind v1alpha1.{{ .Env.KIND }}List")
 		}
 	}
 
-	r := managed.NewReconciler(mgr, resource.ManagedKind({{ .Env.APIVERSION | strings.ToLower }}.{{ .Env.KIND }}GroupVersionKind), opts...)
+	r := managed.NewReconciler(mgr, resource.ManagedKind(v1alpha1.{{ .Env.KIND }}GroupVersionKind), opts...)
 
 	return ctrl.NewControllerManagedBy(mgr).
 		Named(name).
 		WithOptions(o.ForControllerRuntime()).
 		WithEventFilter(resource.DesiredStateChanged()).
-		For(&{{ .Env.APIVERSION | strings.ToLower }}.{{ .Env.KIND }}{}).
+		For(&v1alpha1.{{ .Env.KIND }}{}).
 		Complete(ratelimiter.NewReconciler(name, r, o.GlobalRateLimiter))
 }
 

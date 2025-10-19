@@ -14,5 +14,5 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-// Package sample contains group Sample API versions
+// Package sample contains group sample API versions
 package sample
