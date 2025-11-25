@@ -39,7 +39,6 @@ import (
 )
 
 const (
-	errNotMyType    = "managed resource is not a MyType custom resource"
 	errTrackPCUsage = "cannot track ProviderConfig usage"
 	errGetPC        = "cannot get ProviderConfig"
 	errGetCPC       = "cannot get ClusterProviderConfig"
@@ -70,7 +69,7 @@ func Setup(mgr ctrl.Manager, o controller.Options) error {
 	name := managed.ControllerName(v1alpha1.MyTypeGroupKind)
 
 	opts := []managed.ReconcilerOption{
-		managed.WithExternalConnector(&connector{
+		managed.WithTypedExternalConnector[*v1alpha1.MyType](&connector{
 			kube:         mgr.GetClient(),
 			usage:        resource.NewProviderConfigUsageTracker(mgr.GetClient(), &apisv1alpha1.ProviderConfigUsage{}),
 			newServiceFn: newNoOpService}),
@@ -123,26 +122,19 @@ type connector struct {
 // 2. Getting the managed resource's ProviderConfig.
 // 3. Getting the credentials specified by the ProviderConfig.
 // 4. Using the credentials to form a client.
-func (c *connector) Connect(ctx context.Context, mg resource.Managed) (managed.ExternalClient, error) {
-	cr, ok := mg.(*v1alpha1.MyType)
-	if !ok {
-		return nil, errors.New(errNotMyType)
-	}
-
+func (c *connector) Connect(ctx context.Context, cr *v1alpha1.MyType) (managed.TypedExternalClient[*v1alpha1.MyType], error) {
 	if err := c.usage.Track(ctx, cr); err != nil {
 		return nil, errors.Wrap(err, errTrackPCUsage)
 	}
 
 	var cd apisv1alpha1.ProviderCredentials
 
-	// Switch to ModernManaged resource to get ProviderConfigRef
-	m := mg.(resource.ModernManaged)
-	ref := m.GetProviderConfigReference()
+	ref := cr.GetProviderConfigReference()
 
 	switch ref.Kind {
 	case "ProviderConfig":
 		pc := &apisv1alpha1.ProviderConfig{}
-		if err := c.kube.Get(ctx, types.NamespacedName{Name: ref.Name, Namespace: m.GetNamespace()}, pc); err != nil {
+		if err := c.kube.Get(ctx, types.NamespacedName{Name: ref.Name, Namespace: cr.GetNamespace()}, pc); err != nil {
 			return nil, errors.Wrap(err, errGetPC)
 		}
 		cd = pc.Spec.Credentials
@@ -177,19 +169,14 @@ type external struct {
 	service interface{}
 }
 
-func (c *external) Observe(ctx context.Context, mg resource.Managed) (managed.ExternalObservation, error) {
+func (c *external) Observe(ctx context.Context, cr *v1alpha1.MyType) (managed.ExternalObservation, error) {
 	// If the managed resource is marked for deletion then deleted it.
 	// Because there is no external resource to observe, we return false for
 	// ResourceExists.
-	if meta.WasDeleted(mg) {
+	if meta.WasDeleted(cr) {
 		return managed.ExternalObservation{
 			ResourceExists: false,
 		}, nil
-	}
-
-	cr, ok := mg.(*v1alpha1.MyType)
-	if !ok {
-		return managed.ExternalObservation{}, errors.New(errNotMyType)
 	}
 
 	// These fmt statements should be removed in the real implementation.
@@ -230,12 +217,8 @@ func (c *external) Observe(ctx context.Context, mg resource.Managed) (managed.Ex
 	}, nil
 }
 
-func (c *external) Create(ctx context.Context, mg resource.Managed) (managed.ExternalCreation, error) {
-	cr, ok := mg.(*v1alpha1.MyType)
+func (c *external) Create(ctx context.Context, cr *v1alpha1.MyType) (managed.ExternalCreation, error) {
 	cr.Status.SetConditions(xpv1.Creating())
-	if !ok {
-		return managed.ExternalCreation{}, errors.New(errNotMyType)
-	}
 
 	fmt.Printf("Creating: %+v", cr)
 
@@ -250,12 +233,7 @@ func (c *external) Create(ctx context.Context, mg resource.Managed) (managed.Ext
 	}, nil
 }
 
-func (c *external) Update(ctx context.Context, mg resource.Managed) (managed.ExternalUpdate, error) {
-	cr, ok := mg.(*v1alpha1.MyType)
-	if !ok {
-		return managed.ExternalUpdate{}, errors.New(errNotMyType)
-	}
-
+func (c *external) Update(ctx context.Context, cr *v1alpha1.MyType) (managed.ExternalUpdate, error) {
 	fmt.Printf("Updating: %+v", cr)
 
 	// Copy ConfigurableField to AtProvider and complete the update.
@@ -268,12 +246,8 @@ func (c *external) Update(ctx context.Context, mg resource.Managed) (managed.Ext
 	}, nil
 }
 
-func (c *external) Delete(ctx context.Context, mg resource.Managed) (managed.ExternalDelete, error) {
-	cr, ok := mg.(*v1alpha1.MyType)
+func (c *external) Delete(ctx context.Context, cr *v1alpha1.MyType) (managed.ExternalDelete, error) {
 	cr.Status.SetConditions(xpv1.Deleting())
-	if !ok {
-		return managed.ExternalDelete{}, errors.New(errNotMyType)
-	}
 
 	fmt.Printf("Deleting: %+v", cr)
 
