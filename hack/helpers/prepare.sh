@@ -37,5 +37,5 @@ sed -i.bak "s/provider-template/provider-${ProviderNameLower}/g" go.mod
 git clean -fd
 
 git mv "apis/template.go" "apis/${ProviderNameLower}.go"
-git mv "internal/controller/template.go" "internal/controller/${ProviderNameLower}.go"
+git mv "internal/controller/register.go" "internal/controller/${ProviderNameLower}.go"
 git mv "cluster/images/provider-template" "cluster/images/provider-${ProviderNameLower}"
