@@ -18,6 +18,7 @@ package mytype
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	xpv1 "github.com/crossplane/crossplane-runtime/v2/apis/common/v1"
@@ -29,7 +30,6 @@ import (
 	"github.com/crossplane/crossplane-runtime/v2/pkg/reconciler/managed"
 	"github.com/crossplane/crossplane-runtime/v2/pkg/resource"
 	"github.com/crossplane/crossplane-runtime/v2/pkg/statemetrics"
-	"github.com/pkg/errors"
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -59,7 +59,7 @@ var (
 func SetupGated(mgr ctrl.Manager, o controller.Options) error {
 	o.Gate.Register(func() {
 		if err := Setup(mgr, o); err != nil {
-			panic(errors.Wrap(err, "cannot setup MyType controller"))
+			panic(fmt.Errorf("cannot setup MyType controller: %w", err))
 		}
 	}, v1alpha1.MyTypeGroupVersionKind)
 	return nil
@@ -96,7 +96,7 @@ func Setup(mgr ctrl.Manager, o controller.Options) error {
 			mgr.GetClient(), o.Logger, o.MetricOptions.MRStateMetrics, &v1alpha1.MyTypeList{}, o.MetricOptions.PollStateMetricInterval,
 		)
 		if err := mgr.Add(stateMetricsRecorder); err != nil {
-			return errors.Wrap(err, "cannot register MR state metrics recorder for kind v1alpha1.MyTypeList")
+			return fmt.Errorf("cannot register MR state metrics recorder for kind v1alpha1.MyTypeList: %w", err)
 		}
 	}
 
@@ -130,7 +130,7 @@ func (c *connector) Connect(ctx context.Context, mg resource.Managed) (managed.E
 	}
 
 	if err := c.usage.Track(ctx, cr); err != nil {
-		return nil, errors.Wrap(err, errTrackPCUsage)
+		return nil, fmt.Errorf("%s: %w", errTrackPCUsage, err)
 	}
 
 	var cd apisv1alpha1.ProviderCredentials
@@ -143,27 +143,27 @@ func (c *connector) Connect(ctx context.Context, mg resource.Managed) (managed.E
 	case "ProviderConfig":
 		pc := &apisv1alpha1.ProviderConfig{}
 		if err := c.kube.Get(ctx, types.NamespacedName{Name: ref.Name, Namespace: m.GetNamespace()}, pc); err != nil {
-			return nil, errors.Wrap(err, errGetPC)
+			return nil, fmt.Errorf("%s: %w", errGetPC, err)
 		}
 		cd = pc.Spec.Credentials
 	case "ClusterProviderConfig":
 		cpc := &apisv1alpha1.ClusterProviderConfig{}
 		if err := c.kube.Get(ctx, types.NamespacedName{Name: ref.Name}, cpc); err != nil {
-			return nil, errors.Wrap(err, errGetCPC)
+			return nil, fmt.Errorf("%s: %w", errGetCPC, err)
 		}
 		cd = cpc.Spec.Credentials
 	default:
-		return nil, errors.Errorf("unsupported provider config kind: %s", ref.Kind)
+		return nil, fmt.Errorf("unsupported provider config kind: %s", ref.Kind)
 	}
 
 	data, err := resource.CommonCredentialExtractor(ctx, cd.Source, c.kube, cd.CommonCredentialSelectors)
 	if err != nil {
-		return nil, errors.Wrap(err, errGetCreds)
+		return nil, fmt.Errorf("%s: %w", errGetCreds, err)
 	}
 
 	svc, err := c.newServiceFn(data)
 	if err != nil {
-		return nil, errors.Wrap(err, errNewClient)
+		return nil, fmt.Errorf("%s: %w", errNewClient, err)
 	}
 
 	return &external{service: svc}, nil
