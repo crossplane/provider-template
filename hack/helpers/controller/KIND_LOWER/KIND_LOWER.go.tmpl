@@ -39,7 +39,6 @@ import (
 )
 
 const (
-	errNot{{ .Env.KIND }}   = "managed resource is not a {{ .Env.KIND }} custom resource"
 	errTrackPCUsage = "cannot track ProviderConfig usage"
 	errGetPC    = "cannot get ProviderConfig"
 	errGetCPC   = "cannot get ClusterProviderConfig"
@@ -69,7 +68,7 @@ func Setup(mgr ctrl.Manager, o controller.Options) error {
 	name := managed.ControllerName(v1alpha1.{{ .Env.KIND }}GroupKind)
 
 	opts := []managed.ReconcilerOption{
-		managed.WithExternalConnector(&connector{
+		managed.WithTypedExternalConnector[*{{ .Env.APIVERSION | strings.ToLower }}.{{ .Env.KIND }}](&connector{
 			kube:         mgr.GetClient(),
 			usage:        resource.NewProviderConfigUsageTracker(mgr.GetClient(), &apisv1alpha1.ProviderConfigUsage{}),
 			newServiceFn: newNoOpService}),
@@ -122,26 +121,19 @@ type connector struct {
 // 2. Getting the managed resource's ProviderConfig.
 // 3. Getting the credentials specified by the ProviderConfig.
 // 4. Using the credentials to form a client.
-func (c *connector) Connect(ctx context.Context, mg resource.Managed) (managed.ExternalClient, error) {
-	cr, ok := mg.(*{{ .Env.APIVERSION | strings.ToLower }}.{{ .Env.KIND }})
-	if !ok {
-		return nil, errors.New(errNot{{ .Env.KIND }})
-	}
-
+func (c *connector) Connect(ctx context.Context, cr *{{ .Env.APIVERSION | strings.ToLower }}.{{ .Env.KIND }}) (managed.TypedExternalClient[*{{ .Env.APIVERSION | strings.ToLower }}.{{ .Env.KIND }}], error) {
 	if err := c.usage.Track(ctx, cr); err != nil {
 		return nil, errors.Wrap(err, errTrackPCUsage)
 	}
 
 	var cd apisv1alpha1.ProviderCredentials
 
-	// Switch to ModernManaged resource to get ProviderConfigRef
-	m := mg.(resource.ModernManaged)
-	ref := m.GetProviderConfigReference()
+	ref := cr.GetProviderConfigReference()
 
 	switch ref.Kind {
 	case "ProviderConfig":
 		pc := &apisv1alpha1.ProviderConfig{}
-		if err := c.kube.Get(ctx, types.NamespacedName{Name: ref.Name, Namespace: m.GetNamespace()}, pc); err != nil {
+		if err := c.kube.Get(ctx, types.NamespacedName{Name: ref.Name, Namespace: cr.GetNamespace()}, pc); err != nil {
 			return nil, errors.Wrap(err, errGetPC)
 		}
 		cd = pc.Spec.Credentials
@@ -175,12 +167,7 @@ type external struct {
 	service interface{}
 }
 
-func (c *external) Observe(ctx context.Context, mg resource.Managed) (managed.ExternalObservation, error) {
-	cr, ok := mg.(*{{ .Env.APIVERSION | strings.ToLower }}.{{ .Env.KIND }})
-	if !ok {
-		return managed.ExternalObservation{}, errors.New(errNot{{ .Env.KIND }})
-	}
-
+func (c *external) Observe(ctx context.Context, cr *{{ .Env.APIVERSION | strings.ToLower }}.{{ .Env.KIND }}) (managed.ExternalObservation, error) {
 	// These fmt statements should be removed in the real implementation.
 	fmt.Printf("Observing: %+v", cr)
 
@@ -201,12 +188,7 @@ func (c *external) Observe(ctx context.Context, mg resource.Managed) (managed.Ex
 	}, nil
 }
 
-func (c *external) Create(ctx context.Context, mg resource.Managed) (managed.ExternalCreation, error) {
-	cr, ok := mg.(*{{ .Env.APIVERSION | strings.ToLower }}.{{ .Env.KIND }})
-	if !ok {
-		return managed.ExternalCreation{}, errors.New(errNot{{ .Env.KIND }})
-	}
-
+func (c *external) Create(ctx context.Context, cr *{{ .Env.APIVERSION | strings.ToLower }}.{{ .Env.KIND }}) (managed.ExternalCreation, error) {
 	fmt.Printf("Creating: %+v", cr)
 
 	return managed.ExternalCreation{
@@ -216,12 +198,7 @@ func (c *external) Create(ctx context.Context, mg resource.Managed) (managed.Ext
 	}, nil
 }
 
-func (c *external) Update(ctx context.Context, mg resource.Managed) (managed.ExternalUpdate, error) {
-	cr, ok := mg.(*{{ .Env.APIVERSION | strings.ToLower }}.{{ .Env.KIND }})
-	if !ok {
-		return managed.ExternalUpdate{}, errors.New(errNot{{ .Env.KIND }})
-	}
-
+func (c *external) Update(ctx context.Context, cr *{{ .Env.APIVERSION | strings.ToLower }}.{{ .Env.KIND }}) (managed.ExternalUpdate, error) {
 	fmt.Printf("Updating: %+v", cr)
 
 	return managed.ExternalUpdate{
@@ -231,12 +208,7 @@ func (c *external) Update(ctx context.Context, mg resource.Managed) (managed.Ext
 	}, nil
 }
 
-func (c *external) Delete(ctx context.Context, mg resource.Managed) (managed.ExternalDelete, error) {
-	cr, ok := mg.(*{{ .Env.APIVERSION | strings.ToLower }}.{{ .Env.KIND }})
-	if !ok {
-		return managed.ExternalDelete{}, errors.New(errNot{{ .Env.KIND }})
-	}
-
+func (c *external) Delete(ctx context.Context, cr *{{ .Env.APIVERSION | strings.ToLower }}.{{ .Env.KIND }}) (managed.ExternalDelete, error) {
 	fmt.Printf("Deleting: %+v", cr)
 
 	return managed.ExternalDelete{}, nil
