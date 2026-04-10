@@ -44,6 +44,17 @@ XPKG_REG_ORGS_NO_PROMOTE ?= xpkg.upbound.io/crossplane
 XPKGS = provider-template
 -include build/makelib/xpkg.mk
 
+# ====================================================================================
+# Setup Uptest
+
+CROSSPLANE_VERSION ?= 2.2.0
+-include build/makelib/local.xpkg.mk
+-include build/makelib/controlplane.mk
+
+UPTEST_LOCAL_DEPLOY_TARGET = local.xpkg.deploy.provider.$(PROJECT_NAME)
+UPTEST_INPUT_MANIFESTS = test/e2e/00-lifecycle.yaml
+-include build/makelib/uptest.mk
+
 # NOTE(hasheddan): we force image building to happen prior to xpkg build so that
 # we ensure image is present in daemon.
 xpkg.build.provider-template: do.build.images
@@ -51,9 +62,6 @@ xpkg.build.provider-template: do.build.images
 fallthrough: submodules
 	@echo Initial setup complete. Running make again . . .
 	@make
-
-# integration tests
-e2e.run: test-integration
 
 # Run integration tests.
 test-integration: $(KIND) $(KUBECTL) $(CROSSPLANE_CLI) $(HELM3)
