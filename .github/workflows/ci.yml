@@ -5,14 +5,20 @@ on:
     branches:
       - main
       - release-*
+    tags:
+      - v*
   pull_request: {}
   workflow_dispatch: {}
 
+permissions:
+  contents: read
+  packages: write
+
 env:
   # Common versions
-  GO_VERSION: '1.23'
-  GOLANGCI_VERSION: 'v2.1.2'
-  DOCKER_BUILDX_VERSION: 'v0.23.0'
+  GO_VERSION: "1.23"
+  GOLANGCI_VERSION: "v2.1.2"
+  DOCKER_BUILDX_VERSION: "v0.23.0"
 
   # Common users. We can't run a step 'if secrets.XXX != ""' but we can run a
   # step 'if env.XXX' != ""', so we copy these to succinctly test whether
@@ -31,7 +37,6 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           paths_ignore: '["**.md", "**.png", "**.jpg"]'
           do_not_skip: '["workflow_dispatch", "schedule", "push"]'
-
 
   lint:
     runs-on: ubuntu-22.04
@@ -190,8 +195,15 @@ jobs:
           version: ${{ env.DOCKER_BUILDX_VERSION }}
           install: true
 
+      - name: Login to GHCR
+        uses: docker/login-action@4907a6ddec9925e35a0a9e82d7399ccc52663121 # v4.1.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Login to Upbound
-        uses: docker/login-action@v1
+        uses: docker/login-action@4907a6ddec9925e35a0a9e82d7399ccc52663121 # v4.1.0
         if: env.UPBOUND_MARKETPLACE_PUSH_ROBOT_USR != ''
         with:
           registry: xpkg.upbound.io
@@ -246,5 +258,7 @@ jobs:
           path: _output/**
 
       - name: Publish Artifacts
-        if: env.UPBOUND_MARKETPLACE_PUSH_ROBOT_USR != ''
-        run: make publish BRANCH_NAME=${GITHUB_REF##*/}
+        if: github.event_name != 'pull_request'
+        env:
+          XPKG_REG_ORGS: ${{ env.UPBOUND_MARKETPLACE_PUSH_ROBOT_USR != '' && 'xpkg.upbound.io/crossplane-contrib ghcr.io/crossplane-contrib' || 'ghcr.io/crossplane-contrib' }}
+        run: make publish BRANCH_NAME=${GITHUB_REF##*/} RELEASE_BRANCH_FILTER='main master release-% v%'
