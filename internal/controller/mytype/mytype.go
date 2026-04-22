@@ -18,11 +18,11 @@ package mytype
 
 import (
 	"context"
-	"errors"
 	"fmt"
 
 	xpv1 "github.com/crossplane/crossplane-runtime/v2/apis/common/v1"
 	"github.com/crossplane/crossplane-runtime/v2/pkg/controller"
+	"github.com/crossplane/crossplane-runtime/v2/pkg/errors"
 	"github.com/crossplane/crossplane-runtime/v2/pkg/event"
 	"github.com/crossplane/crossplane-runtime/v2/pkg/feature"
 	"github.com/crossplane/crossplane-runtime/v2/pkg/meta"
@@ -59,7 +59,7 @@ var (
 func SetupGated(mgr ctrl.Manager, o controller.Options) error {
 	o.Gate.Register(func() {
 		if err := Setup(mgr, o); err != nil {
-			panic(fmt.Errorf("cannot setup MyType controller: %w", err))
+			panic(errors.Wrap(err, "cannot setup MyType controller"))
 		}
 	}, v1alpha1.MyTypeGroupVersionKind)
 	return nil
@@ -96,7 +96,7 @@ func Setup(mgr ctrl.Manager, o controller.Options) error {
 			mgr.GetClient(), o.Logger, o.MetricOptions.MRStateMetrics, &v1alpha1.MyTypeList{}, o.MetricOptions.PollStateMetricInterval,
 		)
 		if err := mgr.Add(stateMetricsRecorder); err != nil {
-			return fmt.Errorf("cannot register MR state metrics recorder for kind v1alpha1.MyTypeList: %w", err)
+			return errors.Wrap(err, "cannot register MR state metrics recorder for kind v1alpha1.MyTypeList")
 		}
 	}
 
@@ -130,7 +130,7 @@ func (c *connector) Connect(ctx context.Context, mg resource.Managed) (managed.E
 	}
 
 	if err := c.usage.Track(ctx, cr); err != nil {
-		return nil, fmt.Errorf("%s: %w", errTrackPCUsage, err)
+		return nil, errors.Wrap(err, errTrackPCUsage)
 	}
 
 	var cd apisv1alpha1.ProviderCredentials
@@ -143,27 +143,27 @@ func (c *connector) Connect(ctx context.Context, mg resource.Managed) (managed.E
 	case "ProviderConfig":
 		pc := &apisv1alpha1.ProviderConfig{}
 		if err := c.kube.Get(ctx, types.NamespacedName{Name: ref.Name, Namespace: m.GetNamespace()}, pc); err != nil {
-			return nil, fmt.Errorf("%s: %w", errGetPC, err)
+			return nil, errors.Wrap(err, errGetPC)
 		}
 		cd = pc.Spec.Credentials
 	case "ClusterProviderConfig":
 		cpc := &apisv1alpha1.ClusterProviderConfig{}
 		if err := c.kube.Get(ctx, types.NamespacedName{Name: ref.Name}, cpc); err != nil {
-			return nil, fmt.Errorf("%s: %w", errGetCPC, err)
+			return nil, errors.Wrap(err, errGetCPC)
 		}
 		cd = cpc.Spec.Credentials
 	default:
-		return nil, fmt.Errorf("unsupported provider config kind: %s", ref.Kind)
+		return nil, errors.Errorf("unsupported provider config kind: %s", ref.Kind)
 	}
 
 	data, err := resource.CommonCredentialExtractor(ctx, cd.Source, c.kube, cd.CommonCredentialSelectors)
 	if err != nil {
-		return nil, fmt.Errorf("%s: %w", errGetCreds, err)
+		return nil, errors.Wrap(err, errGetCreds)
 	}
 
 	svc, err := c.newServiceFn(data)
 	if err != nil {
-		return nil, fmt.Errorf("%s: %w", errNewClient, err)
+		return nil, errors.Wrap(err, errNewClient)
 	}
 
 	return &external{service: svc}, nil
