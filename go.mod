@@ -2,7 +2,7 @@ module github.com/crossplane/provider-template
 
 go 1.24.0
 
-toolchain go1.24.5
+toolchain go1.26.2
 
 tool sigs.k8s.io/controller-tools/cmd/controller-gen
 
