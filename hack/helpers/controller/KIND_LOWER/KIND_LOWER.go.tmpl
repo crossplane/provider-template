@@ -40,9 +40,9 @@ import (
 
 const (
 	errTrackPCUsage = "cannot track ProviderConfig usage"
-	errGetPC    = "cannot get ProviderConfig"
-	errGetCPC   = "cannot get ClusterProviderConfig"
-	errGetCreds = "cannot get credentials"
+	errGetPC        = "cannot get ProviderConfig"
+	errGetCPC       = "cannot get ClusterProviderConfig"
+	errGetCreds     = "cannot get credentials"
 
 	errNewClient = "cannot create new Service"
 )
@@ -74,7 +74,7 @@ func Setup(mgr ctrl.Manager, o controller.Options) error {
 			newServiceFn: newNoOpService}),
 		managed.WithLogger(o.Logger.WithValues("controller", name)),
 		managed.WithPollInterval(o.PollInterval),
-		managed.WithRecorder(event.NewAPIRecorder(mgr.GetEventRecorderFor(name))),
+		managed.WithRecorder(event.NewAPIRecorder(mgr.GetEventRecorderFor(name))), //nolint:staticcheck // TODO(jbw976) Crossplane needs to update to the new events API, see https://github.com/crossplane/crossplane/issues/7152
 	}
 
 	if o.Features.Enabled(feature.EnableBetaManagementPolicies) {

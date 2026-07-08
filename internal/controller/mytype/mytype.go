@@ -20,7 +20,6 @@ import (
 	"context"
 	"fmt"
 
-	xpv1 "github.com/crossplane/crossplane-runtime/v2/apis/common/v1"
 	"github.com/crossplane/crossplane-runtime/v2/pkg/controller"
 	"github.com/crossplane/crossplane-runtime/v2/pkg/errors"
 	"github.com/crossplane/crossplane-runtime/v2/pkg/event"
@@ -33,6 +32,8 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+
+	xpv2 "github.com/crossplane/crossplane/apis/v2/core/v2"
 
 	"github.com/crossplane/provider-template/apis/sample/v1alpha1"
 	apisv1alpha1 "github.com/crossplane/provider-template/apis/v1alpha1"
@@ -50,9 +51,7 @@ const (
 // A NoOpService does nothing.
 type NoOpService struct{}
 
-var (
-	newNoOpService = func(_ []byte) (interface{}, error) { return &NoOpService{}, nil }
-)
+var newNoOpService = func(_ []byte) (interface{}, error) { return &NoOpService{}, nil }
 
 // SetupGated adds a controller that reconciles MyType managed resources with safe-start support.
 func SetupGated(mgr ctrl.Manager, o controller.Options) error {
@@ -72,10 +71,11 @@ func Setup(mgr ctrl.Manager, o controller.Options) error {
 		managed.WithTypedExternalConnector[*v1alpha1.MyType](&connector{
 			kube:         mgr.GetClient(),
 			usage:        resource.NewProviderConfigUsageTracker(mgr.GetClient(), &apisv1alpha1.ProviderConfigUsage{}),
-			newServiceFn: newNoOpService}),
+			newServiceFn: newNoOpService,
+		}),
 		managed.WithLogger(o.Logger.WithValues("controller", name)),
 		managed.WithPollInterval(o.PollInterval),
-		managed.WithRecorder(event.NewAPIRecorder(mgr.GetEventRecorderFor(name))),
+		managed.WithRecorder(event.NewAPIRecorder(mgr.GetEventRecorderFor(name))), //nolint:staticcheck // TODO(jbw976) Crossplane needs to update to the new events API, see https://github.com/crossplane/crossplane/issues/7152
 	}
 
 	if o.Features.Enabled(feature.EnableBetaManagementPolicies) {
@@ -199,7 +199,7 @@ func (c *external) Observe(ctx context.Context, cr *v1alpha1.MyType) (managed.Ex
 	}
 
 	// Now the resource is in sync and ready to use, so mark it as available.
-	cr.Status.SetConditions(xpv1.Available())
+	cr.Status.SetConditions(xpv2.Available())
 	return managed.ExternalObservation{
 		// Return false when the external resource does not exist. This lets
 		// the managed resource reconciler know that it needs to call Create to
@@ -218,7 +218,7 @@ func (c *external) Observe(ctx context.Context, cr *v1alpha1.MyType) (managed.Ex
 }
 
 func (c *external) Create(ctx context.Context, cr *v1alpha1.MyType) (managed.ExternalCreation, error) {
-	cr.Status.SetConditions(xpv1.Creating())
+	cr.Status.SetConditions(xpv2.Creating())
 
 	fmt.Printf("Creating: %+v", cr)
 
@@ -247,7 +247,7 @@ func (c *external) Update(ctx context.Context, cr *v1alpha1.MyType) (managed.Ext
 }
 
 func (c *external) Delete(ctx context.Context, cr *v1alpha1.MyType) (managed.ExternalDelete, error) {
-	cr.Status.SetConditions(xpv1.Deleting())
+	cr.Status.SetConditions(xpv2.Deleting())
 
 	fmt.Printf("Deleting: %+v", cr)
 
