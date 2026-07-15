@@ -22,8 +22,14 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 
-	xpv1 "github.com/crossplane/crossplane-runtime/v2/apis/common/v1"
-	xpv2 "github.com/crossplane/crossplane-runtime/v2/apis/common/v2"
+	resource "github.com/crossplane/crossplane-runtime/v2/pkg/resource"
+	xpv2 "github.com/crossplane/crossplane/apis/v2/core/v2"
+)
+
+// interface checks to ensure our types conform to the crossplane-runtime interfaces
+var (
+	_ resource.ModernManaged = &MyType{}
+	_ resource.ManagedList   = &MyTypeList{}
 )
 
 // MyTypeParameters are the configurable fields of a MyType.
@@ -45,8 +51,8 @@ type MyTypeSpec struct {
 
 // A MyTypeStatus represents the observed state of a MyType.
 type MyTypeStatus struct {
-	xpv1.ResourceStatus `json:",inline"`
-	AtProvider          MyTypeObservation `json:"atProvider,omitempty"`
+	xpv2.ManagedResourceStatus `json:",inline"`
+	AtProvider                 MyTypeObservation `json:"atProvider,omitempty"`
 }
 
 // +kubebuilder:object:root=true
