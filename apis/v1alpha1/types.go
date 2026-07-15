@@ -1,8 +1,19 @@
 package v1alpha1
 
 import (
+	resource "github.com/crossplane/crossplane-runtime/v2/pkg/resource"
 	xpv2 "github.com/crossplane/crossplane/apis/v2/core/v2"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+)
+
+// interface checks to ensure our types conform to the crossplane-runtime interfaces
+var (
+	_ resource.ProviderConfig           = &ProviderConfig{}
+	_ resource.ProviderConfig           = &ClusterProviderConfig{}
+	_ resource.TypedProviderConfigUsage = &ProviderConfigUsage{}
+	_ resource.TypedProviderConfigUsage = &ClusterProviderConfigUsage{}
+	_ resource.ProviderConfigUsageList  = &ProviderConfigUsageList{}
+	_ resource.ProviderConfigUsageList  = &ClusterProviderConfigUsageList{}
 )
 
 // A ProviderConfigStatus defines the status of a Provider.
