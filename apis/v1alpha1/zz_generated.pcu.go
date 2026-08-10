@@ -8,26 +8,6 @@ package v1alpha1
 
 import xpv2 "github.com/crossplane/crossplane/apis/v2/core/v2"
 
-// GetProviderConfigReference of this ClusterProviderConfigUsage.
-func (p *ClusterProviderConfigUsage) GetProviderConfigReference() xpv2.ProviderConfigReference {
-	return p.ProviderConfigReference
-}
-
-// GetResourceReference of this ClusterProviderConfigUsage.
-func (p *ClusterProviderConfigUsage) GetResourceReference() xpv2.TypedReference {
-	return p.ResourceReference
-}
-
-// SetProviderConfigReference of this ClusterProviderConfigUsage.
-func (p *ClusterProviderConfigUsage) SetProviderConfigReference(r xpv2.ProviderConfigReference) {
-	p.ProviderConfigReference = r
-}
-
-// SetResourceReference of this ClusterProviderConfigUsage.
-func (p *ClusterProviderConfigUsage) SetResourceReference(r xpv2.TypedReference) {
-	p.ResourceReference = r
-}
-
 // GetProviderConfigReference of this ProviderConfigUsage.
 func (p *ProviderConfigUsage) GetProviderConfigReference() xpv2.ProviderConfigReference {
 	return p.ProviderConfigReference

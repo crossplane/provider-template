@@ -11,9 +11,7 @@ var (
 	_ resource.ProviderConfig           = &ProviderConfig{}
 	_ resource.ProviderConfig           = &ClusterProviderConfig{}
 	_ resource.TypedProviderConfigUsage = &ProviderConfigUsage{}
-	_ resource.TypedProviderConfigUsage = &ClusterProviderConfigUsage{}
 	_ resource.ProviderConfigUsageList  = &ProviderConfigUsageList{}
-	_ resource.ProviderConfigUsageList  = &ClusterProviderConfigUsageList{}
 )
 
 // A ProviderConfigStatus defines the status of a Provider.
@@ -68,7 +66,9 @@ type ProviderConfigList struct {
 // +kubebuilder:printcolumn:name="RESOURCE-KIND",type="string",JSONPath=".resourceRef.kind"
 // +kubebuilder:printcolumn:name="RESOURCE-NAME",type="string",JSONPath=".resourceRef.name"
 // +kubebuilder:resource:scope=Namespaced,categories={crossplane,provider,template}
-// A ProviderConfigUsage indicates that a resource is using a ProviderConfig.
+// A ProviderConfigUsage indicates that a resource is using a ProviderConfig or a
+// ClusterProviderConfig. There is deliberately no cluster scoped usage type, Usages always live in
+// the namespace of the MR that created them, and record which kind of config they refer to.
 type ProviderConfigUsage struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
@@ -107,29 +107,4 @@ type ClusterProviderConfigList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
 	Items           []ClusterProviderConfig `json:"items"`
-}
-
-// +kubebuilder:object:root=true
-// +kubebuilder:storageversion
-
-// +kubebuilder:printcolumn:name="AGE",type="date",JSONPath=".metadata.creationTimestamp"
-// +kubebuilder:printcolumn:name="CONFIG-NAME",type="string",JSONPath=".providerConfigRef.name"
-// +kubebuilder:printcolumn:name="RESOURCE-KIND",type="string",JSONPath=".resourceRef.kind"
-// +kubebuilder:printcolumn:name="RESOURCE-NAME",type="string",JSONPath=".resourceRef.name"
-// +kubebuilder:resource:scope=Cluster,categories={crossplane,provider,template}
-// A ClusterProviderConfigUsage indicates that a resource is using a ClusterProviderConfig.
-type ClusterProviderConfigUsage struct {
-	metav1.TypeMeta   `json:",inline"`
-	metav1.ObjectMeta `json:"metadata,omitempty"`
-
-	xpv2.TypedProviderConfigUsage `json:",inline"`
-}
-
-// +kubebuilder:object:root=true
-
-// ClusterProviderConfigUsageList contains a list of ClusterProviderConfigUsage
-type ClusterProviderConfigUsageList struct {
-	metav1.TypeMeta `json:",inline"`
-	metav1.ListMeta `json:"metadata,omitempty"`
-	Items           []ClusterProviderConfigUsage `json:"items"`
 }
