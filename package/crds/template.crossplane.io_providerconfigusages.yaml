@@ -34,7 +34,10 @@ spec:
     name: v1alpha1
     schema:
       openAPIV3Schema:
-        description: A ProviderConfigUsage indicates that a resource is using a ProviderConfig.
+        description: |-
+          A ProviderConfigUsage indicates that a resource is using a ProviderConfig or a
+          ClusterProviderConfig. There is deliberately no cluster scoped usage type, Usages always live in
+          the namespace of the MR that created them, and record which kind of config they refer to.
         properties:
           apiVersion:
             description: |-
