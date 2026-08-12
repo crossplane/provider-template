@@ -59,10 +59,15 @@ func setupNamespacedProviderConfig(mgr ctrl.Manager, o controller.Options) error
 
 func setupClusterProviderConfig(mgr ctrl.Manager, o controller.Options) error {
 	name := providerconfig.ControllerName(v1alpha1.ClusterProviderConfigGroupKind)
+
+	// Every MR in this provider is namespaced, so every usage record is a namespaced
+	// ProviderConfigUsage. There is no cluster scoped usage type, even for a ClusterProviderConfig.
+	// Instead the usage lives beside the namespaced MR that created it and records which kind of
+	// config it refers to.
 	of := resource.ProviderConfigKinds{
 		Config:    v1alpha1.ClusterProviderConfigGroupVersionKind,
-		Usage:     v1alpha1.ClusterProviderConfigUsageGroupVersionKind,
-		UsageList: v1alpha1.ClusterProviderConfigUsageListGroupVersionKind,
+		Usage:     v1alpha1.ProviderConfigUsageGroupVersionKind,
+		UsageList: v1alpha1.ProviderConfigUsageListGroupVersionKind,
 	}
 
 	r := providerconfig.NewReconciler(mgr, of,
@@ -73,6 +78,6 @@ func setupClusterProviderConfig(mgr ctrl.Manager, o controller.Options) error {
 		Named(name).
 		WithOptions(o.ForControllerRuntime()).
 		For(&v1alpha1.ClusterProviderConfig{}).
-		Watches(&v1alpha1.ClusterProviderConfigUsage{}, &resource.EnqueueRequestForProviderConfig{Kind: v1alpha1.ClusterProviderConfigKind}).
+		Watches(&v1alpha1.ProviderConfigUsage{}, &resource.EnqueueRequestForProviderConfig{Kind: v1alpha1.ClusterProviderConfigKind}).
 		Complete(ratelimiter.NewReconciler(name, r, o.GlobalRateLimiter))
 }
