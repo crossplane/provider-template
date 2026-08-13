@@ -31,9 +31,50 @@ with the following features that are meant to be refactored:
 5. Run `make reviewable` to run code generation, linters, and tests.
 5. Run `make build` to build the provider.
 
+## Testing
+
+```shell
+make test      # unit tests
+make e2e       # end-to-end tests against a kind control plane
+make uptest    # only the e2e tests, reusing a control plane that is already up
+```
+
+`make e2e` runs two suites, and which one a new test belongs in depends on what
+it checks:
+
+- **`test/e2e/`** — the managed resource lifecycle: create, observe, update,
+  import, delete. You do not write these by hand. [uptest] generates them from
+  the annotations on `test/e2e/00-lifecycle.yaml`, because that lifecycle is the
+  same for every managed resource.
+- **`test/behavior/`** — everything that is not the lifecycle: drift correction,
+  the pause annotation, credential resolution, error paths. These are plain
+  [chainsaw] tests, one directory per behaviour.
+
+### Adding a test for your provider
+
+To cover a **new managed resource type**, add it to `test/e2e/00-lifecycle.yaml`
+as another YAML document with a `uptest.upbound.io/conditions` annotation. uptest
+will apply it, assert the conditions, and delete it. To assert more than
+conditions, point `uptest.upbound.io/post-assert-hook` at a script.
+
+To cover a **controller behaviour**, create
+`test/behavior/<name>/chainsaw-test.yaml`; it is picked up automatically. Prefer
+declarative operations — `apply`, `assert`, `patch`, `delete`, and `error`
+(which passes only when a resource is *absent*). Chainsaw removes whatever the
+test applied, so no manual cleanup is needed. Validate before running:
+
+```shell
+.cache/tools/*/chainsaw-* lint test -f test/behavior/<name>/chainsaw-test.yaml
+```
+
+`test/README.md` documents both suites in detail, including what every uptest
+annotation means and which of them are documented only in uptest's source.
+
 Refer to Crossplane's [CONTRIBUTING.md] file for more information on how the
 Crossplane community prefers to work. The [Provider Development][provider-dev]
 guide may also be of use.
 
+[uptest]: https://github.com/crossplane/uptest
+[chainsaw]: https://kyverno.github.io/chainsaw/
 [CONTRIBUTING.md]: https://github.com/crossplane/crossplane/blob/master/CONTRIBUTING.md
 [provider-dev]: https://github.com/crossplane/crossplane/blob/master/contributing/guide-provider-development.md
