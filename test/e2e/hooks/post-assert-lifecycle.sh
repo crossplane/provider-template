@@ -88,15 +88,10 @@ if [[ "${MESSAGE}" != *"nonexistent-config"* ]]; then
 fi
 echo "PASS: error message indicates config issue: ${MESSAGE}"
 
-# ---- Additional controller behaviours, one script per case ----
-# Each case owns the resources it creates and cleans them up on exit. Anything
-# leaked here would hang the delete step's `kubectl wait managed --all
-# --for=delete` long after the real failure.
-CASES_DIR="$(cd "$(dirname "$0")" && pwd)/cases"
+# ---- Controller behaviours beyond the resource lifecycle ----
+# CHAINSAW is exported by uptest.mk, so no Makefile wiring is needed.
+BEHAVIOR_DIR="$(cd "$(dirname "$0")/../.." && pwd)/behavior"
 
-for case_script in "${CASES_DIR}"/*.sh; do
-  [[ -e "${case_script}" ]] || continue
-  echo ""
-  echo "=== case: $(basename "${case_script}") ==="
-  bash "${case_script}"
-done
+echo ""
+echo "Running controller behaviour tests from ${BEHAVIOR_DIR}..."
+"${CHAINSAW}" test "${BEHAVIOR_DIR}" --parallel 1
