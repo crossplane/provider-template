@@ -5,7 +5,7 @@ metadata:
   namespace: default
   annotations:
     uptest.upbound.io/timeout: "120"
-    uptest.upbound.io/conditions: "Ready"
+    uptest.upbound.io/conditions: "Ready,Synced"
     uptest.upbound.io/post-assert-hook: "hooks/post-assert-lifecycle.sh"
     uptest.upbound.io/pre-delete-hook: "hooks/pre-delete-lifecycle.sh"
 spec:

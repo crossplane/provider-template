@@ -23,6 +23,30 @@ if [[ -z "${EXTERNAL_NAME}" ]]; then
 fi
 echo "PASS: external-name = ${EXTERNAL_NAME}"
 
+# ---- Update case: change the spec and assert it propagates to status ----
+# uptest's own update step is unusable here: it requires the
+# uptest.upbound.io/update-parameter annotation to be valid JSON, but v2.2.0
+# interpolates that value raw into a double-quoted shell command, so the JSON
+# quotes are stripped before kubectl sees them. Drive the update ourselves.
+echo ""
+echo "Testing update: patching spec.forProvider.configurableField..."
+
+${KUBECTL} patch mytype "${RESOURCE_NAME}" -n "${NAMESPACE}" --type=merge \
+  -p '{"spec":{"forProvider":{"configurableField":"updated-value"}}}'
+
+${KUBECTL} wait mytype "${RESOURCE_NAME}" -n "${NAMESPACE}" \
+  --for=jsonpath='{.status.atProvider.configurableField}'=updated-value \
+  --timeout=60s
+
+echo "PASS: update propagated to status.atProvider.configurableField"
+
+# The resource must still be Synced and Ready after the update.
+for cond in Synced Ready; do
+  ${KUBECTL} wait mytype "${RESOURCE_NAME}" -n "${NAMESPACE}" \
+    --for=condition="${cond}"=True --timeout=60s
+  echo "PASS: ${cond}=True after update"
+done
+
 # ---- Error case: MyType with non-existent ProviderConfig ----
 echo ""
 echo "Testing error case: MyType with missing ProviderConfig..."
@@ -63,3 +87,16 @@ if [[ "${MESSAGE}" != *"nonexistent-config"* ]]; then
   exit 1
 fi
 echo "PASS: error message indicates config issue: ${MESSAGE}"
+
+# ---- Additional controller behaviours, one script per case ----
+# Each case owns the resources it creates and cleans them up on exit. Anything
+# leaked here would hang the delete step's `kubectl wait managed --all
+# --for=delete` long after the real failure.
+CASES_DIR="$(cd "$(dirname "$0")" && pwd)/cases"
+
+for case_script in "${CASES_DIR}"/*.sh; do
+  [[ -e "${case_script}" ]] || continue
+  echo ""
+  echo "=== case: $(basename "${case_script}") ==="
+  bash "${case_script}"
+done

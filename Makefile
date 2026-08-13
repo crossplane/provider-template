@@ -47,7 +47,7 @@ XPKGS = provider-template
 # ====================================================================================
 # Setup Uptest
 
-CROSSPLANE_VERSION ?= 2.2.0
+CROSSPLANE_VERSION ?= 2.3.4
 -include build/makelib/local.xpkg.mk
 -include build/makelib/controlplane.mk
 
