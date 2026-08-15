@@ -1,9 +1,5 @@
-# Connect()'s ClusterProviderConfig branch, and regression cover for b07ef7f:
-# an in-use ClusterProviderConfig must not be deletable. Usage is recorded as a
-# namespaced ProviderConfigUsage even though the config is cluster scoped --
-# there is deliberately no cluster scoped usage type.
-# Pairs with test/behavior/provider-config, which covers the namespaced kind.
-# Uses a dedicated config -- a deletionTimestamp cannot be undone.
+# ClusterProviderConfig credentials, and that an in-use config cannot be deleted.
+# Uses a dedicated config -- deletion is one-way.
 apiVersion: chainsaw.kyverno.io/v1alpha1
 kind: Test
 metadata:
@@ -60,7 +56,7 @@ spec:
 
     - name: usage is recorded and the config is held
       try:
-        # Namespaced usage naming the cluster scoped kind -- what b07ef7f fixed.
+        # Usage is namespaced even for a cluster scoped config.
         - assert:
             resource:
               apiVersion: template.crossplane.io/v1alpha1
@@ -80,7 +76,7 @@ spec:
 
     - name: deleting it while in use must not remove it
       try:
-        # A script because chainsaw's delete blocks until the object is gone.
+        # Script: chainsaw's delete would block until the object is gone.
         - script:
             content: |
               ${KUBECTL:-kubectl} delete clusterproviderconfig behaviour-cpc-inuse --wait=false

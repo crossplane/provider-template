@@ -90,8 +90,19 @@ echo "PASS: error message indicates config issue: ${MESSAGE}"
 
 # ---- Controller behaviours beyond the resource lifecycle ----
 # CHAINSAW is exported by uptest.mk, so no Makefile wiring is needed.
-BEHAVIOR_DIR="$(cd "$(dirname "$0")/../.." && pwd)/behavior"
+PROJECT_ROOT="$(cd "$(dirname "$0")/../../.." && pwd)"
+BEHAVIOR_DIR="${PROJECT_ROOT}/test/behavior"
 
 echo ""
 echo "Running controller behaviour tests from ${BEHAVIOR_DIR}..."
-"${CHAINSAW}" test "${BEHAVIOR_DIR}" --parallel 1
+# --quiet keeps per-operation logging out of the terminal; failures, errors and
+# the summary are still printed.
+#
+# --report-path must be absolute. chainsaw runs a hook with its working
+# directory set to the generated test directory, so a relative path would write
+# the report into uptest's temp dir and it would be lost.
+"${CHAINSAW}" test "${BEHAVIOR_DIR}" --parallel 1 --quiet \
+  --report-format JUNIT-TEST \
+  --report-path "${PROJECT_ROOT}" \
+  --report-name junit \
+  ${CHAINSAW_ARGS:-}

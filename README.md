@@ -43,32 +43,25 @@ make uptest    # only the e2e tests, reusing a control plane that is already up
 it checks:
 
 - **`test/e2e/`** — the managed resource lifecycle: create, observe, update,
-  import, delete. You do not write these by hand. [uptest] generates them from
-  the annotations on `test/e2e/00-lifecycle.yaml`, because that lifecycle is the
-  same for every managed resource.
-- **`test/behavior/`** — everything that is not the lifecycle: drift correction,
-  the pause annotation, credential resolution, error paths. These are plain
-  [chainsaw] tests, one directory per behaviour.
+  import, delete. [uptest] generates these, so to cover a **new managed resource
+  type** you add it to `test/e2e/00-lifecycle.yaml` as another YAML document
+  with a `uptest.upbound.io/conditions` annotation. Point
+  `uptest.upbound.io/post-assert-hook` at a script to assert more than
+  conditions.
+- **`test/behavior/`** — everything else: drift, the pause annotation,
+  credential resolution, error paths. To cover a **controller behaviour**, add
+  `test/behavior/<name>/chainsaw-test.yaml`; it is picked up automatically.
+  Prefer declarative [chainsaw] operations — `apply`, `assert`, `patch`,
+  `delete`, and `error` (which passes only when a resource is *absent*).
 
-### Adding a test for your provider
-
-To cover a **new managed resource type**, add it to `test/e2e/00-lifecycle.yaml`
-as another YAML document with a `uptest.upbound.io/conditions` annotation. uptest
-will apply it, assert the conditions, and delete it. To assert more than
-conditions, point `uptest.upbound.io/post-assert-hook` at a script.
-
-To cover a **controller behaviour**, create
-`test/behavior/<name>/chainsaw-test.yaml`; it is picked up automatically. Prefer
-declarative operations — `apply`, `assert`, `patch`, `delete`, and `error`
-(which passes only when a resource is *absent*). Chainsaw removes whatever the
-test applied, so no manual cleanup is needed. Validate before running:
+Validate a new chainsaw test before running it:
 
 ```shell
 .cache/tools/*/chainsaw-* lint test -f test/behavior/<name>/chainsaw-test.yaml
 ```
 
-`test/README.md` documents both suites in detail, including what every uptest
-annotation means and which of them are documented only in uptest's source.
+`test/README.md` is the reference: every uptest annotation and where it is
+documented, the make variables, what each test covers, and the known gotchas.
 
 Refer to Crossplane's [CONTRIBUTING.md] file for more information on how the
 Crossplane community prefers to work. The [Provider Development][provider-dev]
