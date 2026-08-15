@@ -29,6 +29,7 @@ import (
 	"k8s.io/client-go/tools/leaderelection/resourcelock"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/cache"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 	"sigs.k8s.io/controller-runtime/pkg/metrics"
 
@@ -41,6 +42,7 @@ import (
 	"github.com/crossplane/crossplane-runtime/v2/pkg/reconciler/customresourcesgate"
 	"github.com/crossplane/crossplane-runtime/v2/pkg/reconciler/managed"
 	"github.com/crossplane/crossplane-runtime/v2/pkg/statemetrics"
+	corev1 "k8s.io/api/core/v1"
 	apiextensionsv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 
@@ -64,6 +66,8 @@ func main() {
 		enableManagementPolicies = app.Flag("enable-management-policies", "Enable support for Management Policies.").Default("true").Envar("ENABLE_MANAGEMENT_POLICIES").Bool()
 		enableChangeLogs         = app.Flag("enable-changelogs", "Enable support for capturing change logs during reconciliation.").Default("false").Envar("ENABLE_CHANGE_LOGS").Bool()
 		changelogsSocketPath     = app.Flag("changelogs-socket-path", "Path for changelogs socket (if enabled)").Default("/var/run/changelogs/changelogs.sock").Envar("CHANGELOGS_SOCKET_PATH").String()
+
+		disableCacheForNativeObjects = app.Flag("disable-cache-native-objects", "Disables cache for native objects (v1.Secret) except crossplane's objects. Enable this if the provider does not have the RBAC to list/watch these objects cluster wide").Default("false").Envar("DISABLE_CACHE_NATIVE_OBJECTS").Bool()
 	)
 	kingpin.MustParse(app.Parse(os.Args[1:]))
 
@@ -83,11 +87,27 @@ func main() {
 	cfg, err := ctrl.GetConfig()
 	kingpin.FatalIfError(err, "Cannot get API server rest config")
 
+	var uncachedObjects []client.Object
+	if *disableCacheForNativeObjects {
+		// By default, controller-runtime's client will cache all objects. This is usually what you want,
+		// but for some native objects like Secrets, it can cause issues if the provider doesn't have
+		// permissions to list/watch them cluster-wide. Because the parameter "disable-cache-native-objects"
+		// is global, the provider developer must list all native objects that the provider uses here
+		// (except Crossplane's objects, such as ProviderConfig). By default, only Secret is used.
+		uncachedObjects = append(uncachedObjects, &corev1.Secret{})
+	}
+
 	mgr, err := ctrl.NewManager(ratelimiter.LimitRESTConfig(cfg, *maxReconcileRate), ctrl.Options{
 		// SyncPeriod in ctrl.Options has been removed since controller-runtime v0.16.0
 		// The recommended way is to move it to cache.Options instead
 		Cache: cache.Options{
 			SyncPeriod: syncInterval,
+		},
+
+		Client: client.Options{
+			Cache: &client.CacheOptions{
+				DisableFor: uncachedObjects,
+			},
 		},
 
 		// controller-runtime uses both ConfigMaps and Leases for leader
