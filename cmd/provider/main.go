@@ -69,7 +69,7 @@ func main() {
 		enableChangeLogs         = app.Flag("enable-changelogs", "Enable support for capturing change logs during reconciliation.").Default("false").Envar("ENABLE_CHANGE_LOGS").Bool()
 		changelogsSocketPath     = app.Flag("changelogs-socket-path", "Path for changelogs socket (if enabled)").Default("/var/run/changelogs/changelogs.sock").Envar("CHANGELOGS_SOCKET_PATH").String()
 
-		enableSecretCache = app.Flag("enable-secret-cache", "Enable caching of Secret objects. When true, Secrets are served from the informer cache instead of direct API calls. This reduces API server load but increases memory usage.").Default("false").Envar("ENABLE_SECRET_CACHE").Bool()
+		enableSecretCache = app.Flag("enable-secret-cache", "Enable caching of Secret objects. When true, Secrets are served from the informer cache instead of direct API calls. This reduces API server load but increases memory usage.").Default("true").Envar("ENABLE_SECRET_CACHE").Bool()
 	)
 	kingpin.MustParse(app.Parse(os.Args[1:]))
 
@@ -92,9 +92,9 @@ func main() {
 	// Client options to control secret caching behavior.
 	var clientOpts client.Options
 	if !*enableSecretCache {
-		// When secret caching is disabled (default), configure the
-		// client to bypass the cache for Secret objects. This means
-		// Get/List calls for Secrets will go directly to the API server.
+		// When secret caching is disabled, configure the client to
+		// bypass the cache for Secret objects. This means Get/List calls
+		// for Secrets will go directly to the API server.
 		clientOpts = client.Options{
 			Cache: &client.CacheOptions{
 				DisableFor: []client.Object{&corev1.Secret{}},
@@ -109,11 +109,11 @@ func main() {
 
 	mgr, err := ctrl.NewManager(ratelimiter.LimitRESTConfig(cfg, *maxReconcileRate), ctrl.Options{
 		Scheme: scheme,
-		// CRD cache optimization: strip large schema data from CRDs
-		// before they enter the informer cache. This significantly
-		// reduces memory usage for providers with many large CRDs.
 		Cache: cache.Options{
 			SyncPeriod: syncInterval,
+			// CRD cache optimization: strip large schema data from CRDs
+			// before they enter the informer cache. This significantly
+			// reduces memory usage for providers with many large CRDs.
 			ByObject: map[client.Object]cache.ByObject{
 				&apiextensionsv1.CustomResourceDefinition{}: {
 					Transform: customresourcesgate.TransformStripCRDSchema,
