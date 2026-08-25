@@ -12,6 +12,7 @@ guidelines and responsibilities for the steering committee and maintainers.
 
 * Jared Watts <jared@upbound.io> ([jbw976](https://github.com/jbw976))
 * Chuan-Yen Chiang <cychiang0823@gmail.com> ([cychiang](https://github.com/cychiang))
+* Jonasz Małecki <jonasz@upbound.io> ([@jonasz-lasut](https://github.com/jonasz-lasut))
 
 ## Emeritus Maintainers
 
