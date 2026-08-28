@@ -1,0 +1,56 @@
+# Connect() rejects a providerConfigRef.kind it does not support. Nothing
+# validates the kind at admission, so this is reachable from a plain manifest.
+apiVersion: chainsaw.kyverno.io/v1alpha1
+kind: Test
+metadata:
+  name: unsupported-config-kind
+spec:
+  timeouts:
+    apply: 1m
+    assert: 1m
+    delete: 2m
+  steps:
+    - name: an unsupported kind reports a useful error
+      try:
+        - apply:
+            resource:
+              apiVersion: sample.template.crossplane.io/v1alpha1
+              kind: MyType
+              metadata:
+                name: behaviour-bad-config-kind
+                namespace: default
+              spec:
+                forProvider:
+                  configurableField: unsupported-kind
+                providerConfigRef:
+                  name: example
+                  kind: NotAProviderConfigKind
+        - assert:
+            resource:
+              apiVersion: sample.template.crossplane.io/v1alpha1
+              kind: MyType
+              metadata:
+                name: behaviour-bad-config-kind
+                namespace: default
+              status:
+                ((conditions[?type == 'Synced'])[0]):
+                  status: "False"
+                  reason: ReconcileError
+                  (contains(message, 'unsupported provider config kind')): true
+
+    - name: it stays deletable
+      try:
+        # Connect() can never succeed here; deletion must not depend on it.
+        - delete:
+            ref:
+              apiVersion: sample.template.crossplane.io/v1alpha1
+              kind: MyType
+              name: behaviour-bad-config-kind
+              namespace: default
+        - error:
+            resource:
+              apiVersion: sample.template.crossplane.io/v1alpha1
+              kind: MyType
+              metadata:
+                name: behaviour-bad-config-kind
+                namespace: default

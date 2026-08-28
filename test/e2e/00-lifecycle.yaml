@@ -1,0 +1,33 @@
+apiVersion: sample.template.crossplane.io/v1alpha1
+kind: MyType
+metadata:
+  name: e2e-lifecycle-test
+  namespace: default
+  annotations:
+    uptest.upbound.io/timeout: "120"
+    uptest.upbound.io/conditions: "Ready,Synced"
+    uptest.upbound.io/post-assert-hook: "hooks/post-assert-lifecycle.sh"
+    uptest.upbound.io/pre-delete-hook: "hooks/pre-delete-lifecycle.sh"
+spec:
+  forProvider:
+    configurableField: "initial-value"
+  providerConfigRef:
+    name: example
+    kind: ProviderConfig
+---
+# The same lifecycle, resolving credentials through the cluster scoped config.
+# Both configs are created by test/setup.sh from examples/provider/config.yaml.
+apiVersion: sample.template.crossplane.io/v1alpha1
+kind: MyType
+metadata:
+  name: e2e-lifecycle-cluster-test
+  namespace: default
+  annotations:
+    uptest.upbound.io/timeout: "120"
+    uptest.upbound.io/conditions: "Ready,Synced"
+spec:
+  forProvider:
+    configurableField: "initial-value"
+  providerConfigRef:
+    name: example
+    kind: ClusterProviderConfig
