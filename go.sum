@@ -25,6 +25,8 @@ github.com/crossplane/crossplane-tools v0.0.0-20260715161912-60e57f817ad1 h1:8//
 github.com/crossplane/crossplane-tools v0.0.0-20260715161912-60e57f817ad1/go.mod h1:8etxwmP4cZwJDwen4+PQlnc1tggltAhEfyyigmdHulQ=
 github.com/crossplane/crossplane/apis/v2 v2.3.4 h1:qB1YqF300msWEkDQTFUhqfeOq3HtVfSZ1+3wNz1JStA=
 github.com/crossplane/crossplane/apis/v2 v2.3.4/go.mod h1:s0cfMZA+Y/dwQ577PLQn5SBWyUg9k6vKjGAkHEwBShg=
+github.com/crossplane/crossplane/apis/v2 v2.4.0 h1:QmZqZe+vvi9IrnEK8rW7UsCDQBqagK6HFV1mYEw/DkQ=
+github.com/crossplane/crossplane/apis/v2 v2.4.0/go.mod h1:Ev+FjQqTTWJWoaXi63uKER215kDjTo8PghDCT0JapZs=
 github.com/dave/jennifer v1.7.1 h1:B4jJJDHelWcDhlRQxWeo0Npa/pYKBLrirAQoTN45txo=
 github.com/dave/jennifer v1.7.1/go.mod h1:nXbxhEmQfOZhWml3D1cDK5M1FLnMSozpbFN/m3RmGZc=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
