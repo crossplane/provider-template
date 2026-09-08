@@ -55,6 +55,10 @@ ${KIND} anywhere, and it did not run code generation):
   3. Add an example manifest under examples/${group_lower}/.
   4. Run: gofmt -w apis/${provider_lower}.go internal/controller/${provider_lower}.go
   5. Run: make generate && go build ./... && go test ./...
+  6. (Optional, after step 5 succeeds once) apis/${group_lower}/${APIVERSION}/${kind_lower}_types.go
+     does not assert resource.ModernManaged/resource.ManagedList conformance like
+     apis/sample/v1alpha1/mytype_types.go does — it can't until zz_generated.managed.go
+     exists. Add it by hand now if you want parity with the sample.
 
 See README.md for the exact before/after edits.
 EOF

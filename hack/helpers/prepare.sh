@@ -25,7 +25,7 @@ git rm -r apis/sample
 git rm -r internal/controller/mytype
 git rm -r examples/sample
 
-REPLACE_FILES='./* ./.github :!build/** :!go.* :!hack/**'
+REPLACE_FILES='./* ./.github ./.golangci.yml :!build/** :!go.* :!hack/** :!PROVIDER_CHECKLIST.md'
 # shellcheck disable=SC2086
 git grep -l 'template' -- ${REPLACE_FILES} | xargs sed -i.bak "s/template/${ProviderNameLower}/g"
 # shellcheck disable=SC2086

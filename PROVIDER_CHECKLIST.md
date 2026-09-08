@@ -43,18 +43,15 @@ Most Crossplane providers include the following files:
   repository's own [README.md](README.md), or an established provider's like
   [provider-aws/README.md](https://github.com/crossplane-contrib/provider-aws/blob/master/README.md),
   as an example)
-- [ ]  Code is licensed under the [Apache 2.0
-  License](https://github.com/crossplane/provider-template/blob/main/LICENSE)
+- [ ]  Code is licensed under the [Apache 2.0 License](LICENSE)
 - [ ]  Include a “Developer Certificate of Origin”. Example:
   [DCO](https://github.com/crossplane/build/blob/main/DCO)
 - [ ]  Include the CNCF [Code of
   Conduct](https://github.com/crossplane/crossplane/blob/main/CODE_OF_CONDUCT.md)
-- [ ]  Update
-  [OWNERS.md](https://github.com/crossplane/provider-template/blob/main/OWNERS.md)
-  with contacts for project Owners
-- [ ]  Ensure `hack/boilerplate.go.txt` (used in Code generation) includes
-  Crossplane Authors, Apache license and any other Copyright statements:
-  [https://github.com/crossplane/provider-template/blob/main/hack/boilerplate.go.txt](https://github.com/crossplane/provider-template/blob/main/hack/boilerplate.go.txt)
+- [ ]  Update [OWNERS.md](OWNERS.md) with contacts for project Owners
+- [ ]  Ensure [`hack/boilerplate.go.txt`](hack/boilerplate.go.txt) (used in
+  Code generation) includes Crossplane Authors, Apache license and any other
+  Copyright statements
 - [ ] Include Documentation on how to:
   - [ ] Install Provider
   - [ ] Contribute to Development
@@ -82,8 +79,7 @@ repository contains most of these settings.
   [https://github.com/crossplane-contrib/provider-aws/blob/master/.golangci.yml](https://github.com/crossplane-contrib/provider-aws/blob/master/.golangci.yml)
 - [ ] Create a [Crossplane
   Package](https://docs.crossplane.io/latest/packages/)
-  configuration (see
-  [package/crossplane.yaml)](https://github.com/crossplane/provider-template/blob/main/package/crossplane.yaml)
+  configuration (see [package/crossplane.yaml](package/crossplane.yaml))
 
 ## Deployment of Artifacts
 
@@ -97,8 +93,7 @@ the publish and promotion workflows.
 
 In general, providers should:
 
-- [ ] Utilize GitHub workflows from
-  <https://github.com/crossplane/provider-template/tree/main/.github/workflows>
+- [ ] Utilize the [GitHub workflows](.github/workflows) in this repository
 - [ ] Create OCI image repos to push Package and Controller images.
 - [ ] Automatically push Provider images and packages via CI
 - [ ] Add GitHub Secrets to push to Docker repository. (To be performed by
@@ -114,7 +109,7 @@ to grant your project access to the GitHub org scoped secrets.
 
 - [ ] Follow recommendations at
   [https://github.com/crossplane/crossplane/blob/main/GOVERNANCE.md#repository-governance](https://github.com/crossplane/crossplane/blob/main/GOVERNANCE.md#repository-governance)
-- [ ] Enable Issues on your project and configure Issue templates (examples at:
-  [.github/ISSUE_TEMPLATE](https://github.com/crossplane/provider-template/tree/main/.github/ISSUE_TEMPLATE))
-- [ ] Create Pull Request Templates: (example:
-  [PULL_REQUEST_TEMPLATE.md](https://github.com/crossplane/provider-template/blob/main/.github/PULL_REQUEST_TEMPLATE.md))
+- [ ] Enable Issues on your project and configure issue templates (examples
+  at: [.github/ISSUE_TEMPLATE](.github/ISSUE_TEMPLATE))
+- [ ] Create a pull request template (example:
+  [.github/PULL_REQUEST_TEMPLATE.md](.github/PULL_REQUEST_TEMPLATE.md))

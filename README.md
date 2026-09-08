@@ -2,7 +2,7 @@
 
 `provider-template` is a minimal [Crossplane](https://crossplane.io/) Provider
 that is meant to be used as a starting point for implementing new Providers.
-It comes with the following features that are meant to be refactored:
+Before you run the steps in [Developing](#developing) below, it ships with:
 
 - A `ProviderConfig` type that only points to a credentials `Secret`.
 - A `MyType` resource type that serves as an example managed resource.
@@ -25,13 +25,13 @@ Use the Go toolchain version pinned in [`go.mod`](go.mod). If your local
 GOTOOLCHAIN=go$(sed -n 's/^go //p' go.mod) make reviewable
 ```
 
-The pinned `golangci-lint` (see `build/makelib/k8s_tools.mk` for the exact
-version) can't typecheck a newer Go standard library, so plain
-`make reviewable`/`make lint` fails with `could not import
-math/rand/v2 ... (typecheck)` on a newer local Go — even before you touch
-anything in this repo. `go build`/`go test`/`go generate` themselves are
-unaffected; only the lint step needs the pin. Docker is only needed if you
-also want `make build` to produce OCI images.
+The pinned `golangci-lint` (its exact version is set in
+`build/makelib/k8s_tools.mk`, added by step 2 below) can't typecheck a newer
+Go standard library, so plain `make reviewable`/`make lint` fails with
+`could not import math/rand/v2 ... (typecheck)` on a newer local Go — even
+before you touch anything in this repo. `go build`/`go test`/`go generate`
+themselves are unaffected; only the lint step needs the pin. Docker is only
+needed if you also want `make build` to produce OCI images.
 
 ### 1. Create your repository
 
@@ -83,15 +83,35 @@ make provider.addtype provider=Acme group=storage kind=Bucket
 ```
 
 Pass `apiversion=v1beta1` (defaults to `v1alpha1`) to generate a different
-API version. This writes:
+API version — the paths below move with it, e.g. `apis/storage/v1beta1/...`
+if you did. This writes:
 
 - `apis/storage/storage.go` and
-  `apis/storage/v1alpha1/{doc,groupversion_info,bucket_types}.go`
+  `apis/storage/<apiversion>/{doc,groupversion_info,bucket_types}.go`
 - `internal/controller/bucket/{bucket,bucket_test}.go`
 
 The scaffolded controller is a **no-op stub**: its `Connect`/`Observe`/
 `Create`/`Update`/`Delete` methods don't call any real external API — you
 still need to replace them with calls to your actual backend.
+
+Unlike `apis/sample/v1alpha1/mytype_types.go`, the generated `bucket_types.go`
+does **not** assert `resource.ModernManaged`/`resource.ManagedList`
+conformance. It can't: that assertion only compiles once
+`zz_generated.managed.go` exists, but `go generate` (step 9) has to
+typecheck this package *before* it can write that file — so a fresh type
+with the assertion already present fails generation with `missing method
+GetCondition` on the very first run. Once step 9 has succeeded at least
+once, you can add the assertion by hand for parity with the sample:
+
+```go
+resource "github.com/crossplane/crossplane-runtime/v2/pkg/resource"
+
+// interface checks to ensure our types conform to the crossplane-runtime interfaces
+var (
+	_ resource.ModernManaged = &Bucket{}
+	_ resource.ManagedList   = &BucketList{}
+)
+```
 
 This step does **not** register the new type anywhere, and it does not run
 code generation (`zz_generated.*.go`, `package/crds/**`) — steps 5–9 below
@@ -146,10 +166,25 @@ cover that.
 
 ### 7. Add an example manifest
 
-Step 3 deletes `examples/sample/`. Add an example for your new type under
-`examples/storage/`, modeled on the deleted `examples/sample/mytype.yaml` —
-update the `apiVersion` and `kind`, e.g.
-`apiVersion: storage.acme.crossplane.io/v1alpha1` / `kind: Bucket`.
+Step 3 deletes `examples/sample/`. Add `examples/storage/bucket.yaml`:
+
+```yaml
+apiVersion: storage.acme.crossplane.io/v1alpha1
+kind: Bucket
+metadata:
+  name: example
+  namespace: default
+spec:
+  forProvider:
+    configurableField: test
+  providerConfigRef:
+    name: example
+    kind: ProviderConfig
+```
+
+`providerConfigRef.kind` is either `ProviderConfig` (namespaced, shown above)
+or `ClusterProviderConfig`; both are valid because the generated `Bucket`
+type embeds `xpv2.ManagedResourceSpec`, same as `MyType`.
 
 ### 8. Format your edits
 
@@ -180,5 +215,5 @@ Refer to Crossplane's [CONTRIBUTING.md] file for more information on how the
 Crossplane community prefers to work. The [Provider Development][provider-dev]
 guide may also be of use.
 
-[CONTRIBUTING.md]: https://github.com/crossplane/crossplane/blob/master/CONTRIBUTING.md
-[provider-dev]: https://github.com/crossplane/crossplane/blob/master/contributing/guide-provider-development.md
+[CONTRIBUTING.md]: https://github.com/crossplane/crossplane/blob/main/CONTRIBUTING.md
+[provider-dev]: https://github.com/crossplane/crossplane/blob/main/contributing/guide-provider-development.md

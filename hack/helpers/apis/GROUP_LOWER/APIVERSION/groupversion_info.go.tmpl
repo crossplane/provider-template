@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-// Package {{ .Env.APIVERSION | strings.ToLower }} contains the {{ .Env.APIVERSION | strings.ToLower }} group {{ .Env.GROUP | strings.Title }} resources of the {{ .Env.PROVIDER }} provider.
+// Package {{ .Env.APIVERSION | strings.ToLower }} contains the {{ .Env.APIVERSION | strings.ToLower }} group {{ .Env.GROUP | strings.Title }} resources of the {{ .Env.PROVIDER | strings.ToLower }} provider.
 // +kubebuilder:object:generate=true
 // +groupName={{ .Env.GROUP | strings.ToLower }}.{{ .Env.PROVIDER | strings.ToLower }}.crossplane.io
 // +versionName={{ .Env.APIVERSION | strings.ToLower }}
