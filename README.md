@@ -18,16 +18,16 @@ and kind throughout.
 
 ### Prerequisites
 
-Use the Go toolchain version pinned in [`go.mod`](go.mod) (currently
-`go 1.25.11`). If your local `go version` is newer, pin it before running
-`make reviewable` (step 9):
+Use the Go toolchain version pinned in [`go.mod`](go.mod). If your local
+`go version` is newer, pin it before running `make reviewable` (step 9):
 
 ```shell
 GOTOOLCHAIN=go$(sed -n 's/^go //p' go.mod) make reviewable
 ```
 
-The pinned `golangci-lint` (2.12.2) can't typecheck a newer Go standard
-library, so plain `make reviewable`/`make lint` fails with `could not import
+The pinned `golangci-lint` (see `build/makelib/k8s_tools.mk` for the exact
+version) can't typecheck a newer Go standard library, so plain
+`make reviewable`/`make lint` fails with `could not import
 math/rand/v2 ... (typecheck)` on a newer local Go — even before you touch
 anything in this repo. `go build`/`go test`/`go generate` themselves are
 unaffected; only the lint step needs the pin. Docker is only needed if you
