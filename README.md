@@ -61,9 +61,10 @@ make provider.prepare provider=Acme
 >
 > It also finds-and-replaces this placeholder name (and its capitalized
 > form) with your provider name across nearly every tracked file, including
-> **this README.md, the Makefile, and PROVIDER_CHECKLIST.md themselves**. If
-> you're reading this file from disk rather than from memory, the copy in
-> your clone will read slightly differently from here on.
+> **this README.md and the Makefile themselves** (`PROVIDER_CHECKLIST.md` is
+> deliberately exempt — it's a guide about authoring a provider, not about
+> this one). If you're reading this file from disk rather than from memory,
+> the copy in your clone will read slightly differently from here on.
 
 This moves the API aggregator to `apis/acme.go` and the controller
 aggregator from `internal/controller/register.go` to
