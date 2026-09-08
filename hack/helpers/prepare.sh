@@ -23,6 +23,7 @@ ProviderNameLower=$(echo "${PROVIDER}" | tr "[:upper:]" "[:lower:]")
 
 git rm -r apis/sample
 git rm -r internal/controller/mytype
+git rm -r examples/sample
 
 REPLACE_FILES='./* ./.github :!build/** :!go.* :!hack/**'
 # shellcheck disable=SC2086
@@ -39,3 +40,19 @@ git clean -fd
 git mv "apis/template.go" "apis/${ProviderNameLower}.go"
 git mv "internal/controller/register.go" "internal/controller/${ProviderNameLower}.go"
 git mv "cluster/images/provider-template" "cluster/images/provider-${ProviderNameLower}"
+
+cat <<EOF
+
+Next steps (the tree does not compile yet):
+
+  1. Register your new type's scheme in apis/${ProviderNameLower}.go
+     (replace the apis/sample/v1alpha1 import and its AddToSchemes entry).
+  2. Register your new controller in internal/controller/${ProviderNameLower}.go
+     (replace the internal/controller/mytype import and its SetupGated entry).
+     Run: make provider.addtype provider=${ProviderNameUpper} group=<group> kind=<kind>
+     first if you haven't added a type yet.
+  3. Add an example manifest under examples/<group>/ (examples/sample was removed).
+  4. Run: make generate && go build ./... && go test ./...
+
+See README.md for the exact edits.
+EOF

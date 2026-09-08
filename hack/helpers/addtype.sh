@@ -40,5 +40,22 @@ mkdir -p "internal/controller/${kind_lower}"
 ${GOMPLATE} < "hack/helpers/controller/KIND_LOWER/KIND_LOWER.go.tmpl" > "internal/controller/${kind_lower}/${kind_lower}.go"
 ${GOMPLATE} < "hack/helpers/controller/KIND_LOWER/KIND_LOWER_test.go.tmpl" > "internal/controller/${kind_lower}/${kind_lower}_test.go"
 
+provider_lower=$(echo "${PROVIDER}" | tr "[:upper:]" "[:lower:]")
 
+cat <<EOF
+
+Next steps (this script only wrote hand-written files; it did not register
+${KIND} anywhere, and it did not run code generation):
+
+  1. In apis/${provider_lower}.go: import "${PROJECT_REPO}/apis/${group_lower}/${APIVERSION}"
+     and add its SchemeBuilder.AddToScheme to AddToSchemes.
+  2. In internal/controller/${provider_lower}.go: import
+     "${PROJECT_REPO}/internal/controller/${kind_lower}" and add
+     ${kind_lower}.SetupGated to the setup list.
+  3. Add an example manifest under examples/${group_lower}/.
+  4. Run: gofmt -w apis/${provider_lower}.go internal/controller/${provider_lower}.go
+  5. Run: make generate && go build ./... && go test ./...
+
+See README.md for the exact before/after edits.
+EOF
 
