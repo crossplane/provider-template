@@ -1,0 +1,113 @@
+# Connect()'s namespaced ProviderConfig branch, and its usage accounting: an
+# in-use ProviderConfig must not be deletable.
+# Pairs with test/behavior/cluster-provider-config, which covers the cluster
+# scoped kind. Both record usage as a namespaced ProviderConfigUsage.
+# Uses a dedicated config -- a deletionTimestamp cannot be undone.
+apiVersion: chainsaw.kyverno.io/v1alpha1
+kind: Test
+metadata:
+  name: provider-config
+spec:
+  timeouts:
+    apply: 1m
+    assert: 2m
+    delete: 2m
+    exec: 1m
+  steps:
+    - name: use a namespaced config
+      try:
+        - apply:
+            resource:
+              apiVersion: template.crossplane.io/v1alpha1
+              kind: ProviderConfig
+              metadata:
+                name: behaviour-pc-inuse
+                namespace: default
+              spec:
+                credentials:
+                  source: Secret
+                  secretRef:
+                    namespace: default
+                    name: example-provider-secret
+                    key: credentials
+        - apply:
+            resource:
+              apiVersion: sample.template.crossplane.io/v1alpha1
+              kind: MyType
+              metadata:
+                name: behaviour-pc-user
+                namespace: default
+              spec:
+                forProvider:
+                  configurableField: namespaced-creds
+                providerConfigRef:
+                  name: behaviour-pc-inuse
+                  kind: ProviderConfig
+        - assert:
+            resource:
+              apiVersion: sample.template.crossplane.io/v1alpha1
+              kind: MyType
+              metadata:
+                name: behaviour-pc-user
+                namespace: default
+              status:
+                atProvider:
+                  configurableField: namespaced-creds
+                ((conditions[?type == 'Ready'])[0]):
+                  status: "True"
+                ((conditions[?type == 'Synced'])[0]):
+                  status: "True"
+
+    - name: usage is recorded and the config is held
+      try:
+        - assert:
+            resource:
+              apiVersion: template.crossplane.io/v1alpha1
+              kind: ProviderConfigUsage
+              metadata:
+                namespace: default
+              providerConfigRef:
+                name: behaviour-pc-inuse
+                kind: ProviderConfig
+        - assert:
+            resource:
+              apiVersion: template.crossplane.io/v1alpha1
+              kind: ProviderConfig
+              metadata:
+                name: behaviour-pc-inuse
+                namespace: default
+                (contains(finalizers, 'in-use.crossplane.io')): true
+
+    - name: deleting it while in use must not remove it
+      try:
+        # A script because chainsaw's delete blocks until the object is gone.
+        - script:
+            content: |
+              ${KUBECTL:-kubectl} delete providerconfig behaviour-pc-inuse -n default --wait=false
+        - sleep:
+            duration: 10s
+        - assert:
+            resource:
+              apiVersion: template.crossplane.io/v1alpha1
+              kind: ProviderConfig
+              metadata:
+                name: behaviour-pc-inuse
+                namespace: default
+                (deletionTimestamp != null): true
+
+    - name: releasing the last user completes the deletion
+      try:
+        - delete:
+            ref:
+              apiVersion: sample.template.crossplane.io/v1alpha1
+              kind: MyType
+              name: behaviour-pc-user
+              namespace: default
+        - error:
+            timeout: 2m
+            resource:
+              apiVersion: template.crossplane.io/v1alpha1
+              kind: ProviderConfig
+              metadata:
+                name: behaviour-pc-inuse
+                namespace: default

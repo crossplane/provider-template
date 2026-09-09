@@ -1,0 +1,68 @@
+# The controller repairs drifted external state without a spec change.
+apiVersion: chainsaw.kyverno.io/v1alpha1
+kind: Test
+metadata:
+  name: drift-correction
+spec:
+  timeouts:
+    apply: 1m
+    assert: 3m
+    delete: 2m
+  steps:
+    - name: create the resource
+      try:
+        - apply:
+            resource:
+              apiVersion: sample.template.crossplane.io/v1alpha1
+              kind: MyType
+              metadata:
+                name: behaviour-drift
+                namespace: default
+              spec:
+                forProvider:
+                  configurableField: drift-value
+                providerConfigRef:
+                  name: example
+                  kind: ProviderConfig
+        - assert:
+            resource:
+              apiVersion: sample.template.crossplane.io/v1alpha1
+              kind: MyType
+              metadata:
+                name: behaviour-drift
+                namespace: default
+              status:
+                atProvider:
+                  configurableField: drift-value
+                ((conditions[?type == 'Ready'])[0]):
+                  status: "True"
+                ((conditions[?type == 'Synced'])[0]):
+                  status: "True"
+
+    - name: corrupt the observed state
+      try:
+        # A script because chainsaw 0.2.13's patch cannot target a subresource.
+        - script:
+            content: |
+              ${KUBECTL:-kubectl} patch mytype behaviour-drift -n default \
+                --subresource=status --type=merge \
+                -p '{"status":{"atProvider":{"configurableField":"drifted"}}}'
+
+    - name: expect the controller to repair it
+      try:
+        # Status-only writes raise no event, so recovery waits for --poll (1m).
+        - assert:
+            timeout: 3m
+            resource:
+              apiVersion: sample.template.crossplane.io/v1alpha1
+              kind: MyType
+              metadata:
+                name: behaviour-drift
+                namespace: default
+              status:
+                atProvider:
+                  configurableField: drift-value
+                ((conditions[?type == 'Ready'])[0]):
+                  status: "True"
+                ((conditions[?type == 'Synced'])[0]):
+                  status: "True"

@@ -1,0 +1,107 @@
+# ClusterProviderConfig credentials, and that an in-use config cannot be deleted.
+# Uses a dedicated config -- deletion is one-way.
+apiVersion: chainsaw.kyverno.io/v1alpha1
+kind: Test
+metadata:
+  name: cluster-provider-config
+spec:
+  timeouts:
+    apply: 1m
+    assert: 2m
+    delete: 2m
+    exec: 1m
+  steps:
+    - name: use a cluster scoped config
+      try:
+        - apply:
+            resource:
+              apiVersion: template.crossplane.io/v1alpha1
+              kind: ClusterProviderConfig
+              metadata:
+                name: behaviour-cpc-inuse
+              spec:
+                credentials:
+                  source: Secret
+                  secretRef:
+                    namespace: default
+                    name: example-provider-secret
+                    key: credentials
+        - apply:
+            resource:
+              apiVersion: sample.template.crossplane.io/v1alpha1
+              kind: MyType
+              metadata:
+                name: behaviour-cpc-user
+                namespace: default
+              spec:
+                forProvider:
+                  configurableField: cluster-scoped-creds
+                providerConfigRef:
+                  name: behaviour-cpc-inuse
+                  kind: ClusterProviderConfig
+        - assert:
+            resource:
+              apiVersion: sample.template.crossplane.io/v1alpha1
+              kind: MyType
+              metadata:
+                name: behaviour-cpc-user
+                namespace: default
+              status:
+                atProvider:
+                  configurableField: cluster-scoped-creds
+                ((conditions[?type == 'Ready'])[0]):
+                  status: "True"
+                ((conditions[?type == 'Synced'])[0]):
+                  status: "True"
+
+    - name: usage is recorded and the config is held
+      try:
+        # Usage is namespaced even for a cluster scoped config.
+        - assert:
+            resource:
+              apiVersion: template.crossplane.io/v1alpha1
+              kind: ProviderConfigUsage
+              metadata:
+                namespace: default
+              providerConfigRef:
+                name: behaviour-cpc-inuse
+                kind: ClusterProviderConfig
+        - assert:
+            resource:
+              apiVersion: template.crossplane.io/v1alpha1
+              kind: ClusterProviderConfig
+              metadata:
+                name: behaviour-cpc-inuse
+                (contains(finalizers, 'in-use.crossplane.io')): true
+
+    - name: deleting it while in use must not remove it
+      try:
+        # Script: chainsaw's delete would block until the object is gone.
+        - script:
+            content: |
+              ${KUBECTL:-kubectl} delete clusterproviderconfig behaviour-cpc-inuse --wait=false
+        - sleep:
+            duration: 10s
+        - assert:
+            resource:
+              apiVersion: template.crossplane.io/v1alpha1
+              kind: ClusterProviderConfig
+              metadata:
+                name: behaviour-cpc-inuse
+                (deletionTimestamp != null): true
+
+    - name: releasing the last user completes the deletion
+      try:
+        - delete:
+            ref:
+              apiVersion: sample.template.crossplane.io/v1alpha1
+              kind: MyType
+              name: behaviour-cpc-user
+              namespace: default
+        - error:
+            timeout: 2m
+            resource:
+              apiVersion: template.crossplane.io/v1alpha1
+              kind: ClusterProviderConfig
+              metadata:
+                name: behaviour-cpc-inuse

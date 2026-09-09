@@ -31,9 +31,43 @@ with the following features that are meant to be refactored:
 5. Run `make reviewable` to run code generation, linters, and tests.
 5. Run `make build` to build the provider.
 
+## Testing
+
+```shell
+make test      # unit tests
+make e2e       # end-to-end tests against a kind control plane
+make uptest    # only the e2e tests, reusing a control plane that is already up
+```
+
+`make e2e` runs two suites, and which one a new test belongs in depends on what
+it checks:
+
+- **`test/e2e/`** — the managed resource lifecycle: create, observe, update,
+  import, delete. [uptest] generates these, so to cover a **new managed resource
+  type** you add it to `test/e2e/00-lifecycle.yaml` as another YAML document
+  with a `uptest.upbound.io/conditions` annotation. Point
+  `uptest.upbound.io/post-assert-hook` at a script to assert more than
+  conditions.
+- **`test/behavior/`** — everything else: drift, the pause annotation,
+  credential resolution, error paths. To cover a **controller behaviour**, add
+  `test/behavior/<name>/chainsaw-test.yaml`; it is picked up automatically.
+  Prefer declarative [chainsaw] operations — `apply`, `assert`, `patch`,
+  `delete`, and `error` (which passes only when a resource is *absent*).
+
+Validate a new chainsaw test before running it:
+
+```shell
+.cache/tools/*/chainsaw-* lint test -f test/behavior/<name>/chainsaw-test.yaml
+```
+
+`test/README.md` is the reference: every uptest annotation and where it is
+documented, the make variables, what each test covers, and the known gotchas.
+
 Refer to Crossplane's [CONTRIBUTING.md] file for more information on how the
 Crossplane community prefers to work. The [Provider Development][provider-dev]
 guide may also be of use.
 
+[uptest]: https://github.com/crossplane/uptest
+[chainsaw]: https://kyverno.github.io/chainsaw/
 [CONTRIBUTING.md]: https://github.com/crossplane/crossplane/blob/master/CONTRIBUTING.md
 [provider-dev]: https://github.com/crossplane/crossplane/blob/master/contributing/guide-provider-development.md
