@@ -24,6 +24,10 @@ GOLANGCILINT_VERSION = 2.12.2
 -include build/makelib/golang.mk
 
 # ====================================================================================
+# Setup kind
+KIND_NODE_IMAGE_TAG ?= v1.29.0
+
+# ====================================================================================
 # Setup Kubernetes tools
 
 -include build/makelib/k8s_tools.mk
@@ -56,7 +60,7 @@ fallthrough: submodules
 e2e.run: test-integration
 
 # Run integration tests.
-test-integration: $(KIND) $(KUBECTL) $(CROSSPLANE_CLI) $(HELM3)
+test-integration: $(KIND) $(KUBECTL) $(CROSSPLANE_CLI) $(HELM)
 	@$(INFO) running integration tests using kind $(KIND_VERSION)
 	@KIND_NODE_IMAGE_TAG=${KIND_NODE_IMAGE_TAG} $(ROOT_DIR)/cluster/local/integration_tests.sh || $(FAIL)
 	@$(OK) integration tests passed
