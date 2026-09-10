@@ -20,19 +20,20 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/crossplane/crossplane-runtime/v2/pkg/feature"
-
-	"k8s.io/apimachinery/pkg/types"
-	ctrl "sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/client"
-
 	"github.com/crossplane/crossplane-runtime/v2/pkg/controller"
 	"github.com/crossplane/crossplane-runtime/v2/pkg/errors"
 	"github.com/crossplane/crossplane-runtime/v2/pkg/event"
+	"github.com/crossplane/crossplane-runtime/v2/pkg/feature"
+	"github.com/crossplane/crossplane-runtime/v2/pkg/meta"
 	"github.com/crossplane/crossplane-runtime/v2/pkg/ratelimiter"
 	"github.com/crossplane/crossplane-runtime/v2/pkg/reconciler/managed"
 	"github.com/crossplane/crossplane-runtime/v2/pkg/resource"
 	"github.com/crossplane/crossplane-runtime/v2/pkg/statemetrics"
+	"k8s.io/apimachinery/pkg/types"
+	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/client"
+
+	xpv2 "github.com/crossplane/crossplane/apis/v2/core/v2"
 
 	{{ .Env.APIVERSION | strings.ToLower }} "{{ .Env.PROJECT_REPO | strings.ToLower }}/apis/{{ .Env.GROUP | strings.ToLower }}/{{ .Env.APIVERSION | strings.ToLower }}"
 	apisv1alpha1 "{{ .Env.PROJECT_REPO | strings.ToLower }}/apis/v1alpha1"
@@ -50,9 +51,7 @@ const (
 // A NoOpService does nothing.
 type NoOpService struct{}
 
-var (
-	newNoOpService = func(_ []byte) (interface{}, error) { return &NoOpService{}, nil }
-)
+var newNoOpService = func(_ []byte) (interface{}, error) { return &NoOpService{}, nil }
 
 // SetupGated adds a controller that reconciles {{ .Env.KIND }} managed resources with safe-start support.
 func SetupGated(mgr ctrl.Manager, o controller.Options) error {
@@ -60,18 +59,20 @@ func SetupGated(mgr ctrl.Manager, o controller.Options) error {
 		if err := Setup(mgr, o); err != nil {
 			panic(errors.Wrap(err, "cannot setup {{ .Env.KIND }} controller"))
 		}
-	}, v1alpha1.{{ .Env.KIND }}GroupVersionKind)
+	}, {{ .Env.APIVERSION | strings.ToLower }}.{{ .Env.KIND }}GroupVersionKind)
 	return nil
 }
 
+// Setup adds a controller that reconciles {{ .Env.KIND }} managed resources.
 func Setup(mgr ctrl.Manager, o controller.Options) error {
-	name := managed.ControllerName(v1alpha1.{{ .Env.KIND }}GroupKind)
+	name := managed.ControllerName({{ .Env.APIVERSION | strings.ToLower }}.{{ .Env.KIND }}GroupKind)
 
 	opts := []managed.ReconcilerOption{
 		managed.WithTypedExternalConnector[*{{ .Env.APIVERSION | strings.ToLower }}.{{ .Env.KIND }}](&connector{
 			kube:         mgr.GetClient(),
 			usage:        resource.NewProviderConfigUsageTracker(mgr.GetClient(), &apisv1alpha1.ProviderConfigUsage{}),
-			newServiceFn: newNoOpService}),
+			newServiceFn: newNoOpService,
+		}),
 		managed.WithLogger(o.Logger.WithValues("controller", name)),
 		managed.WithPollInterval(o.PollInterval),
 		managed.WithRecorder(event.NewAPIRecorder(mgr.GetEventRecorderFor(name))), //nolint:staticcheck // TODO(jbw976) Crossplane needs to update to the new events API, see https://github.com/crossplane/crossplane/issues/7152
@@ -91,20 +92,20 @@ func Setup(mgr ctrl.Manager, o controller.Options) error {
 
 	if o.MetricOptions != nil && o.MetricOptions.MRStateMetrics != nil {
 		stateMetricsRecorder := statemetrics.NewMRStateRecorder(
-			mgr.GetClient(), o.Logger, o.MetricOptions.MRStateMetrics, &v1alpha1.{{ .Env.KIND }}List{}, o.MetricOptions.PollStateMetricInterval,
+			mgr.GetClient(), o.Logger, o.MetricOptions.MRStateMetrics, &{{ .Env.APIVERSION | strings.ToLower }}.{{ .Env.KIND }}List{}, o.MetricOptions.PollStateMetricInterval,
 		)
 		if err := mgr.Add(stateMetricsRecorder); err != nil {
-			return errors.Wrap(err, "cannot register MR state metrics recorder for kind v1alpha1.{{ .Env.KIND }}List")
+			return errors.Wrap(err, "cannot register MR state metrics recorder for kind {{ .Env.APIVERSION | strings.ToLower }}.{{ .Env.KIND }}List")
 		}
 	}
 
-	r := managed.NewReconciler(mgr, resource.ManagedKind(v1alpha1.{{ .Env.KIND }}GroupVersionKind), opts...)
+	r := managed.NewReconciler(mgr, resource.ManagedKind({{ .Env.APIVERSION | strings.ToLower }}.{{ .Env.KIND }}GroupVersionKind), opts...)
 
 	return ctrl.NewControllerManagedBy(mgr).
 		Named(name).
 		WithOptions(o.ForControllerRuntime()).
 		WithEventFilter(resource.DesiredStateChanged()).
-		For(&v1alpha1.{{ .Env.KIND }}{}).
+		For(&{{ .Env.APIVERSION | strings.ToLower }}.{{ .Env.KIND }}{}).
 		Complete(ratelimiter.NewReconciler(name, r, o.GlobalRateLimiter))
 }
 
@@ -146,6 +147,7 @@ func (c *connector) Connect(ctx context.Context, cr *{{ .Env.APIVERSION | string
 	default:
 		return nil, errors.Errorf("unsupported provider config kind: %s", ref.Kind)
 	}
+
 	data, err := resource.CommonCredentialExtractor(ctx, cd.Source, c.kube, cd.CommonCredentialSelectors)
 	if err != nil {
 		return nil, errors.Wrap(err, errGetCreds)
@@ -168,9 +170,36 @@ type external struct {
 }
 
 func (c *external) Observe(ctx context.Context, cr *{{ .Env.APIVERSION | strings.ToLower }}.{{ .Env.KIND }}) (managed.ExternalObservation, error) {
+	// If the managed resource is marked for deletion then deleted it.
+	// Because there is no external resource to observe, we return false for
+	// ResourceExists.
+	if meta.WasDeleted(cr) {
+		return managed.ExternalObservation{
+			ResourceExists: false,
+		}, nil
+	}
+
 	// These fmt statements should be removed in the real implementation.
 	fmt.Printf("Observing: %+v", cr)
 
+	// Simulate external resource doesn't exist, and enter to create the flow
+	if meta.GetExternalName(cr) == "" {
+		return managed.ExternalObservation{
+			ResourceExists: false,
+		}, nil
+	}
+
+	// Simulate external resource exists and not in sync
+	if cr.Status.AtProvider.ConfigurableField != cr.Spec.ForProvider.ConfigurableField {
+		// This case should trigger an update
+		return managed.ExternalObservation{
+			ResourceExists:   true,
+			ResourceUpToDate: false,
+		}, nil
+	}
+
+	// Now the resource is in sync and ready to use, so mark it as available.
+	cr.Status.SetConditions(xpv2.Available())
 	return managed.ExternalObservation{
 		// Return false when the external resource does not exist. This lets
 		// the managed resource reconciler know that it needs to call Create to
@@ -189,7 +218,13 @@ func (c *external) Observe(ctx context.Context, cr *{{ .Env.APIVERSION | strings
 }
 
 func (c *external) Create(ctx context.Context, cr *{{ .Env.APIVERSION | strings.ToLower }}.{{ .Env.KIND }}) (managed.ExternalCreation, error) {
+	cr.Status.SetConditions(xpv2.Creating())
+
 	fmt.Printf("Creating: %+v", cr)
+
+	// Copy ConfigurableField to AtProvider and complete the creation.
+	cr.Status.AtProvider.ConfigurableField = cr.Spec.ForProvider.ConfigurableField
+	meta.SetExternalName(cr, "my-external-name")
 
 	return managed.ExternalCreation{
 		// Optionally return any details that may be required to connect to the
@@ -201,6 +236,9 @@ func (c *external) Create(ctx context.Context, cr *{{ .Env.APIVERSION | strings.
 func (c *external) Update(ctx context.Context, cr *{{ .Env.APIVERSION | strings.ToLower }}.{{ .Env.KIND }}) (managed.ExternalUpdate, error) {
 	fmt.Printf("Updating: %+v", cr)
 
+	// Copy ConfigurableField to AtProvider and complete the update.
+	cr.Status.AtProvider.ConfigurableField = cr.Spec.ForProvider.ConfigurableField
+
 	return managed.ExternalUpdate{
 		// Optionally return any details that may be required to connect to the
 		// external resource. These will be stored as the connection secret.
@@ -209,6 +247,8 @@ func (c *external) Update(ctx context.Context, cr *{{ .Env.APIVERSION | strings.
 }
 
 func (c *external) Delete(ctx context.Context, cr *{{ .Env.APIVERSION | strings.ToLower }}.{{ .Env.KIND }}) (managed.ExternalDelete, error) {
+	cr.Status.SetConditions(xpv2.Deleting())
+
 	fmt.Printf("Deleting: %+v", cr)
 
 	return managed.ExternalDelete{}, nil

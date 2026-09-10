@@ -20,11 +20,13 @@ set -euo pipefail
 
 ProviderNameUpper=${PROVIDER}
 ProviderNameLower=$(echo "${PROVIDER}" | tr "[:upper:]" "[:lower:]")
+DOMAIN="${DOMAIN:-crossplane.io}"
 
 git rm -r apis/sample
 git rm -r internal/controller/mytype
+git rm -r examples/sample
 
-REPLACE_FILES='./* ./.github :!build/** :!go.* :!hack/**'
+REPLACE_FILES='./* ./.github ./.golangci.yml :!build/** :!go.* :!hack/** :!PROVIDER_CHECKLIST.md'
 # shellcheck disable=SC2086
 git grep -l 'template' -- ${REPLACE_FILES} | xargs sed -i.bak "s/template/${ProviderNameLower}/g"
 # shellcheck disable=SC2086
@@ -33,9 +35,41 @@ git grep -l 'Template' -- ${REPLACE_FILES} | xargs sed -i.bak "s/Template/${Prov
 # some imported packages under require section.
 sed -i.bak "s/provider-template/provider-${ProviderNameLower}/g" go.mod
 
+# Retarget the API group domain. Match the provider's whole group string, not
+# the bare domain: meta.crossplane.io and crossplane.io/external-name are
+# Crossplane's own.
+if [ "${DOMAIN}" != "crossplane.io" ]; then
+	# shellcheck disable=SC2086
+	group_files=$(git grep -l "${ProviderNameLower}\.crossplane\.io" -- ${REPLACE_FILES} || true)
+	if [ -n "${group_files}" ]; then
+		echo "${group_files}" |
+			xargs sed -i.bak "s/${ProviderNameLower}\.crossplane\.io/${ProviderNameLower}.${DOMAIN}/g"
+	fi
+fi
+
 # Clean up the .bak files created by sed
 git clean -fd
 
 git mv "apis/template.go" "apis/${ProviderNameLower}.go"
 git mv "internal/controller/register.go" "internal/controller/${ProviderNameLower}.go"
 git mv "cluster/images/provider-template" "cluster/images/provider-${ProviderNameLower}"
+
+cat <<EOF
+
+Your API groups are now ${ProviderNameLower}.${DOMAIN} (ProviderConfig) and
+<group>.${ProviderNameLower}.${DOMAIN} (your types). provider.addtype reads that
+suffix back out of apis/v1alpha1/register.go, so it needs no domain of its own.
+
+Next steps (the tree does not compile yet):
+
+  1. Register your new type's scheme in apis/${ProviderNameLower}.go
+     (replace the apis/sample/v1alpha1 import and its AddToSchemes entry).
+  2. Register your new controller in internal/controller/${ProviderNameLower}.go
+     (replace the internal/controller/mytype import and its SetupGated entry).
+     Run: make provider.addtype provider=${ProviderNameUpper} group=<group> kind=<kind>
+     first if you haven't added a type yet.
+  3. Add an example manifest under examples/<group>/ (examples/sample was removed).
+  4. Run: make generate && go build ./... && go test ./...
+
+See README.md for the exact edits.
+EOF
