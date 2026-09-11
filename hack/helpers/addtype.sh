@@ -19,9 +19,20 @@
 set -euo pipefail
 
 APIVERSION="${APIVERSION:-v1alpha1}"
-echo "Adding type ${KIND} to group ${GROUP} with version ${APIVERSION}"
+
+# Derived from the ProviderConfig group provider.prepare wrote, not passed in,
+# so a type's group cannot disagree with the provider's own.
+GROUP_SUFFIX=$(sed -n 's/^[[:space:]]*Group[[:space:]]*=[[:space:]]*"\([^"]*\)".*/\1/p' apis/v1alpha1/register.go | head -1)
+if [ -z "${GROUP_SUFFIX}" ]; then
+	echo "cannot read the provider's API group from apis/v1alpha1/register.go" >&2
+	echo "run 'make provider.prepare provider=<Name>' first" >&2
+	exit 1
+fi
+
+echo "Adding type ${KIND} to group $(echo "${GROUP}" | tr '[:upper:]' '[:lower:]').${GROUP_SUFFIX} with version ${APIVERSION}"
 
 export GROUP
+export GROUP_SUFFIX
 export KIND
 export APIVERSION
 export PROVIDER
@@ -40,5 +51,26 @@ mkdir -p "internal/controller/${kind_lower}"
 ${GOMPLATE} < "hack/helpers/controller/KIND_LOWER/KIND_LOWER.go.tmpl" > "internal/controller/${kind_lower}/${kind_lower}.go"
 ${GOMPLATE} < "hack/helpers/controller/KIND_LOWER/KIND_LOWER_test.go.tmpl" > "internal/controller/${kind_lower}/${kind_lower}_test.go"
 
+provider_lower=$(echo "${PROVIDER}" | tr "[:upper:]" "[:lower:]")
 
+cat <<EOF
+
+Next steps (this script only wrote hand-written files; it did not register
+${KIND} anywhere, and it did not run code generation):
+
+  1. In apis/${provider_lower}.go: import "${PROJECT_REPO}/apis/${group_lower}/${APIVERSION}"
+     and add its SchemeBuilder.AddToScheme to AddToSchemes.
+  2. In internal/controller/${provider_lower}.go: import
+     "${PROJECT_REPO}/internal/controller/${kind_lower}" and add
+     ${kind_lower}.SetupGated to the setup list.
+  3. Add an example manifest under examples/${group_lower}/.
+  4. Run: gofmt -w apis/${provider_lower}.go internal/controller/${provider_lower}.go
+  5. Run: make generate && go build ./... && go test ./...
+  6. (Optional, after step 5 succeeds once) apis/${group_lower}/${APIVERSION}/${kind_lower}_types.go
+     does not assert resource.ModernManaged/resource.ManagedList conformance like
+     apis/sample/v1alpha1/mytype_types.go does — it can't until zz_generated.managed.go
+     exists. Add it by hand now if you want parity with the sample.
+
+See README.md for the exact before/after edits.
+EOF
 
