@@ -14,10 +14,13 @@ PLATFORMS ?= linux_amd64 linux_arm64
 # ====================================================================================
 # Setup Go
 
-# golangci-lint is a prebuilt binary and cannot typecheck a standard library
-# newer than the Go that built it. GOTOOLCHAIN=auto only upgrades, so pin to
-# go.mod's own directive.
-GOTOOLCHAIN ?= go$(shell sed -n 's/^go //p' go.mod)
+# Every go command run by make uses go.mod's own Go version, the same one CI
+# sets up, downloading it on first use if the local Go differs. golangci-lint
+# in particular is a prebuilt binary that cannot typecheck a standard library
+# newer than the Go that built it, and GOTOOLCHAIN=auto only ever upgrades.
+# Override with GOTOOLCHAIN=local to use the Go on your PATH instead.
+
+GOTOOLCHAIN ?= go$(shell awk '$$1 == "go" { v = $$2; if (v ~ /^[0-9]+\.[0-9]+$$/) v = v ".0"; print v; exit }' go.mod)
 export GOTOOLCHAIN
 
 NPROCS ?= 1

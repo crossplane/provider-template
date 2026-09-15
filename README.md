@@ -19,10 +19,13 @@ substitute your own provider, group, and kind throughout.
 
 ### Prerequisites
 
-Any recent Go will do — the `Makefile` pins `GOTOOLCHAIN` to [`go.mod`](go.mod)'s
-directive. Don't remove that pin: the bundled `golangci-lint` cannot typecheck a
-standard library newer than the Go that built it, and `make reviewable` then
-fails before you have changed anything.
+The project builds with the Go version in [`go.mod`](go.mod), the same one CI
+uses. Any Go 1.21 or newer on your `PATH` will do: `make` pins `GOTOOLCHAIN` to
+that version and downloads it on first use. The pin only applies to `make`
+targets — a bare `go test ./...` uses your own Go.
+
+Don't remove the pin: the bundled `golangci-lint` cannot typecheck a standard
+library newer than the Go that built it, so `make reviewable` would fail.
 
 Docker is only needed if you also want `make build` to produce OCI images.
 
