@@ -71,7 +71,7 @@ repository contains most of these settings.
 
 - [ ] Use the [crossplane/build](https://github.com/crossplane/build) submodule
   (this repository already does; see [`.gitmodules`](.gitmodules) and
-  [https://github.com/crossplane/crossplane/blob/main/CONTRIBUTING.md#establishing-a-development-environment](https://github.com/crossplane/crossplane/blob/main/CONTRIBUTING.md#establishing-a-development-environment)).
+  [`README.md#establishing-a-development-environment`](https://github.com/crossplane/crossplane/blob/main/contributing/README.md#establishing-a-development-environment)).
 - [ ] Include a
   [Makefile](Makefile)
   that supports common build targets.
@@ -102,7 +102,7 @@ In general, providers should:
 If you're part of the crossplane-contrib org and want to enable Github CI, push
 OCI images or packages to the crossplane org in Docker Hub please ask a
 [steering committee
-member](https://github.com/crossplane/crossplane/blob/main/OWNERS.md#steering-committee)
+member](https://github.com/crossplane/crossplane/blob/main/GOVERNANCE.md#steering-committee)
 to grant your project access to the GitHub org scoped secrets.
 
 ## Governance
