@@ -47,13 +47,23 @@ eval $(make --no-print-directory -C ${projectdir} build.vars)
 
 SAFEHOSTARCH="${SAFEHOSTARCH:-amd64}"
 BUILD_IMAGE="${BUILD_REGISTRY}/${PROJECT_NAME}-${SAFEHOSTARCH}"
-PACKAGE_IMAGE="crossplane.io/inttests/${PROJECT_NAME}:${VERSION}"
-CONTROLLER_IMAGE="${BUILD_REGISTRY}/${PROJECT_NAME}-controller-${SAFEHOSTARCH}"
+CONTROLLER_IMAGE="${BUILD_REGISTRY}/${PROJECT_NAME}-${SAFEHOSTARCH}"
 
 version_tag="$(cat ${projectdir}/_output/version)"
 # tag as latest version to load into kind cluster
-PACKAGE_CONTROLLER_IMAGE="${DOCKER_REGISTRY}/${PROJECT_NAME}-controller:${VERSION}"
+PACKAGE_CONTROLLER_IMAGE="${DOCKER_REGISTRY:+${DOCKER_REGISTRY}/}${PROJECT_NAME}-controller:${VERSION}"
 K8S_CLUSTER="${K8S_CLUSTER:-${BUILD_REGISTRY}-inttests}"
+
+# Crossplane v2 requires spec.package to be a fully qualified OCI reference
+# (registry with dots + repo + tag/digest). Use a fake digest so crossplane
+# skips the HEAD request and goes straight to the local cache.
+FAKE_DIGEST="sha256:0000000000000000000000000000000000000000000000000000000000000000"
+PACKAGE_SOURCE="xpkg.crossplane.internal/dev/${PACKAGE_NAME}"
+PACKAGE_IMAGE="${PACKAGE_SOURCE}@${FAKE_DIGEST}"
+# Cache key mirrors crossplane-runtime FriendlyID(source, digest):
+# truncate(source,50) + "-" + truncate(digest,12), DNS-label sanitized.
+PACKAGE_CACHE_ID=$(printf '%.50s-%.12s' "${PACKAGE_SOURCE}" "${FAKE_DIGEST}" \
+  | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/-/g' | cut -c1-63 | sed 's/-*$//')
 
 CROSSPLANE_NAMESPACE="crossplane-system"
 
@@ -73,8 +83,8 @@ echo_step "setting up local package cache"
 CACHE_PATH="${projectdir}/.work/inttest-package-cache"
 mkdir -p "${CACHE_PATH}"
 echo "created cache dir at ${CACHE_PATH}"
-docker tag "${BUILD_IMAGE}" "${PACKAGE_IMAGE}"
-"${UP}" xpkg xp-extract --from-daemon "${PACKAGE_IMAGE}" -o "${CACHE_PATH}/${PACKAGE_NAME}.gz" && chmod 644 "${CACHE_PATH}/${PACKAGE_NAME}.gz"
+XPKG_PATH="${projectdir}/_output/xpkg/linux_${SAFEHOSTARCH}/${PACKAGE_NAME}-${version_tag}.xpkg"
+"${CROSSPLANE_CLI}" xpkg extract --from-xpkg "${XPKG_PATH}" -o "${CACHE_PATH}/${PACKAGE_CACHE_ID}.gz" && chmod 644 "${CACHE_PATH}/${PACKAGE_CACHE_ID}.gz"
 
 # create kind cluster with extra mounts
 KIND_NODE_IMAGE="kindest/node:${KIND_NODE_IMAGE_TAG}"
@@ -91,9 +101,8 @@ EOF
 )"
 echo "${KIND_CONFIG}" | "${KIND}" create cluster --name="${K8S_CLUSTER}" --wait=5m --image="${KIND_NODE_IMAGE}" --config=-
 
-# tag controller image and load it into kind cluster
-docker tag "${CONTROLLER_IMAGE}" "${PACKAGE_CONTROLLER_IMAGE}"
-"${KIND}" load docker-image "${PACKAGE_CONTROLLER_IMAGE}" --name="${K8S_CLUSTER}"
+# load controller image into kind cluster
+"${KIND}" load docker-image "${CONTROLLER_IMAGE}" --name="${K8S_CLUSTER}"
 
 echo_step "create crossplane-system namespace"
 "${KUBECTL}" create ns crossplane-system
@@ -138,13 +147,13 @@ echo "${PVC_YAML}" | "${KUBECTL}" create -f -
 
 # install crossplane from stable channel
 echo_step "installing crossplane from stable channel"
-"${HELM3}" repo add crossplane-stable https://charts.crossplane.io/stable/
-chart_version="$("${HELM3}" search repo crossplane-stable/crossplane | awk 'FNR == 2 {print $2}')"
+"${HELM}" repo add crossplane-stable https://charts.crossplane.io/stable/ --force-update
+chart_version="$("${HELM}" search repo crossplane-stable/crossplane | awk 'FNR == 2 {print $2}')"
 echo_info "using crossplane version ${chart_version}"
 echo
 # we replace empty dir with our PVC so that the /cache dir in the kind node
 # container is exposed to the crossplane pod
-"${HELM3}" install crossplane --namespace crossplane-system crossplane-stable/crossplane --version ${chart_version} --wait --set packageCache.pvc=package-cache
+"${HELM}" install crossplane --namespace crossplane-system crossplane-stable/crossplane --version ${chart_version} --wait --set packageCache.pvc=package-cache
 
 # ----------- integration tests
 echo_step "--- INTEGRATION TESTS ---"
@@ -153,13 +162,30 @@ echo_step "--- INTEGRATION TESTS ---"
 echo_step "installing ${PROJECT_NAME} into \"${CROSSPLANE_NAMESPACE}\" namespace"
 
 INSTALL_YAML="$( cat <<EOF
+apiVersion: pkg.crossplane.io/v1beta1
+kind: DeploymentRuntimeConfig
+metadata:
+  name: "${PACKAGE_NAME}"
+spec:
+  deploymentTemplate:
+    spec:
+      selector: {}
+      strategy: {}
+      template:
+        spec:
+          containers:
+          - name: package-runtime
+            image: "${CONTROLLER_IMAGE}"
+---
 apiVersion: pkg.crossplane.io/v1
 kind: Provider
 metadata:
   name: "${PACKAGE_NAME}"
 spec:
-  package: "${PACKAGE_NAME}"
+  package: "${PACKAGE_IMAGE}"
   packagePullPolicy: Never
+  runtimeConfigRef:
+    name: "${PACKAGE_NAME}"
 EOF
 )"
 
