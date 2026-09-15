@@ -14,9 +14,9 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-// Package v1alpha1 contains the v1alpha1 group Sample resources of the {{ .Env.PROVIDER }} provider.
+// Package {{ .Env.APIVERSION | strings.ToLower }} contains the {{ .Env.APIVERSION | strings.ToLower }} group {{ .Env.GROUP | strings.Title }} resources of the {{ .Env.PROVIDER | strings.ToLower }} provider.
 // +kubebuilder:object:generate=true
-// +groupName={{ .Env.GROUP | strings.ToLower }}.{{ .Env.PROVIDER | strings.ToLower }}.crossplane.io
+// +groupName={{ .Env.GROUP | strings.ToLower }}.{{ .Env.GROUP_SUFFIX }}
 // +versionName={{ .Env.APIVERSION | strings.ToLower }}
 package {{ .Env.APIVERSION | strings.ToLower }}
 
@@ -27,7 +27,7 @@ import (
 
 // Package type metadata.
 const (
-	Group   = "{{ .Env.GROUP | strings.ToLower }}.{{ .Env.PROVIDER | strings.ToLower }}.crossplane.io"
+	Group   = "{{ .Env.GROUP | strings.ToLower }}.{{ .Env.GROUP_SUFFIX }}"
 	Version = "{{ .Env.APIVERSION | strings.ToLower }}"
 )
 

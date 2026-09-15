@@ -14,6 +14,15 @@ PLATFORMS ?= linux_amd64 linux_arm64
 # ====================================================================================
 # Setup Go
 
+# Every go command run by make uses go.mod's own Go version, the same one CI
+# sets up, downloading it on first use if the local Go differs. golangci-lint
+# in particular is a prebuilt binary that cannot typecheck a standard library
+# newer than the Go that built it, and GOTOOLCHAIN=auto only ever upgrades.
+# Override with GOTOOLCHAIN=local to use the Go on your PATH instead.
+
+GOTOOLCHAIN ?= go$(shell awk '$$1 == "go" { v = $$2; if (v ~ /^[0-9]+\.[0-9]+$$/) v = v ".0"; print v; exit }' go.mod)
+export GOTOOLCHAIN
+
 NPROCS ?= 1
 GO_TEST_PARALLEL := $(shell echo $$(( $(NPROCS) / 2 )))
 GO_STATIC_PACKAGES = $(GO_PROJECT)/cmd/provider
@@ -26,6 +35,10 @@ GOLANGCILINT_VERSION = 2.12.2
 # ====================================================================================
 # Setup Kubernetes tools
 
+# The submodule defaults to a 1.x CLI, which drops spec.capabilities when it
+# rebuilds package/crossplane.yaml. The package then installs and reports
+# Healthy but reconciles nothing. Matches crossplane/apis/v2 in go.mod.
+CROSSPLANE_CLI_VERSION ?= v2.3.4
 -include build/makelib/k8s_tools.mk
 
 # ====================================================================================
@@ -128,9 +141,10 @@ export GOMPLATE
 # consider stashing/resetting your git state.
 # Arguments:
 #   provider: Camel case name of your provider, e.g. GitHub, PlanetScale
+#   domain: DNS domain for the API groups. Optional, defaults to "crossplane.io".
 provider.prepare:
 	@[ "${provider}" ] || ( echo "argument \"provider\" is not set"; exit 1 )
-	@PROVIDER=$(provider) ./hack/helpers/prepare.sh
+	@PROVIDER=$(provider) DOMAIN=$(domain) ./hack/helpers/prepare.sh
 
 # This target adds a new api type and its controller.
 # You would still need to register new api in "apis/<provider>.go" and
