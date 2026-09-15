@@ -51,8 +51,7 @@ mkdir -p "internal/controller/${kind_lower}"
 ${GOMPLATE} < "hack/helpers/controller/KIND_LOWER/KIND_LOWER.go.tmpl" > "internal/controller/${kind_lower}/${kind_lower}.go"
 ${GOMPLATE} < "hack/helpers/controller/KIND_LOWER/KIND_LOWER_test.go.tmpl" > "internal/controller/${kind_lower}/${kind_lower}_test.go"
 
-# The templates render imports in a fixed order, but gofmt sorts them by path:
-# a group that sorts after "v1alpha1" (e.g. widgets) would otherwise fail lint.
+# The templates render imports in a fixed order, run gofmt to fix it:
 gofmt -s -w \
 	"apis/${group_lower}/${group_lower}.go" \
 	"apis/${group_lower}/${APIVERSION}/${kind_lower}_types.go" \
@@ -74,13 +73,7 @@ ${KIND} anywhere, and it did not run code generation):
      "${PROJECT_REPO}/internal/controller/${kind_lower}" and add
      ${kind_lower}.SetupGated to the setup list.
   3. Add an example manifest under examples/${group_lower}/.
-  4. Run: gofmt -w apis/${provider_lower}.go internal/controller/${provider_lower}.go
-     (the generated files above are already gofmt'd)
-  5. Run: make generate && go build ./... && go test ./...
-  6. (Optional, after step 5 succeeds once) apis/${group_lower}/${APIVERSION}/${kind_lower}_types.go
-     does not assert resource.ModernManaged/resource.ManagedList conformance like
-     apis/sample/v1alpha1/mytype_types.go does — it can't until zz_generated.managed.go
-     exists. Add it by hand now if you want parity with the sample.
+  4. Run: make generate && go build ./... && go test ./...
 
 See README.md for the exact before/after edits.
 EOF
