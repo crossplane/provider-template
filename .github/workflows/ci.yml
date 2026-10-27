@@ -20,7 +20,7 @@ env:
   UPBOUND_MARKETPLACE_PUSH_ROBOT_USR: ${{ secrets.UPBOUND_MARKETPLACE_PUSH_ROBOT_USR }}
 jobs:
   detect-noop:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-26.04
     outputs:
       noop: ${{ steps.noop.outputs.should_skip }}
     steps:
@@ -34,7 +34,7 @@ jobs:
 
 
   lint:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-26.04
     needs: detect-noop
     if: needs.detect-noop.outputs.noop != 'true'
 
@@ -78,7 +78,7 @@ jobs:
           version: ${{ env.GOLANGCI_VERSION }}
 
   check-diff:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-26.04
     needs: detect-noop
     if: needs.detect-noop.outputs.noop != 'true'
 
@@ -125,7 +125,7 @@ jobs:
         run: git diff
 
   unit-tests:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-26.04
     needs: detect-noop
     if: needs.detect-noop.outputs.noop != 'true'
 
@@ -174,11 +174,18 @@ jobs:
           file: _output/tests/linux_amd64/coverage.txt
 
   publish-artifacts:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-26.04
     needs: detect-noop
     if: needs.detect-noop.outputs.noop != 'true'
 
     steps:
+      # Temporary workaround: ubuntu-26.04 mounts /tmp as a tmpfs capped at about 8 GiB,
+      # which makes large builds fail with "disk quota exceeded". RUNNER_TEMP lives on the
+      # root disk. Remove once GitHub's ubuntu-26.04 rollout keeps /tmp on disk.
+      # See https://github.com/actions/runner-images/issues/14777
+      - name: Keep temp files off the size-capped tmpfs /tmp of ubuntu-26.04 runners
+        run: echo "TMPDIR=$RUNNER_TEMP" >> "$GITHUB_ENV"
+
       - name: Setup QEMU
         uses: docker/setup-qemu-action@v2
         with:
