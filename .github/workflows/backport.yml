@@ -18,7 +18,7 @@ jobs:
   # The main gotcha with this action is that PRs _must_ be labelled before they're
   # merged to trigger a backport.
   open-pr:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-26.04
     if: github.event.pull_request.merged
     steps:
       - name: Checkout
